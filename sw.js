@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ssnps-v4-secure';
+const CACHE_NAME='ssnps-v6-secure-auth';
 const CORE_FILES = ['./','./index.html','./manifest.json'];
 
 self.addEventListener('install', e => {
