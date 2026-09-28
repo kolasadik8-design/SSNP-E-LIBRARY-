@@ -17,7 +17,8 @@
     {
       "src": "https://cdn-icons-png.flaticon.com/512/512/1695/1695632.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     }
   ]
 }
