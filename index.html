@@ -1,45 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#16213e">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SSNPS Police Academy</title>
+
+<!-- PWA - مهم جدا لـ PWABuilder -->
+<link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#16213e">
-<meta name="theme-color" content="#16213e">
-<link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/1695/1695632.png">
+<link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/512/1695/1695632.png">
+<meta name="description" content="South Sudan National Police Service - Training Academy System">
+
 <style>
-*{box-sizing:border-box;margin:0;padding:0;font-family:Arial, sans-serif}
+*{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif}
 body{background:#0a0e1a;color:#fff;min-height:100vh}
-header{background:#16213e;padding:15px;text-align:center;border-bottom:2px solid #0f3460}
+header{background:#16213e;padding:15px;text-align:center;border-bottom:2px solid #0f3460;position:sticky;top:0;z-index:10}
 .btn{background:#0f3460;color:#fff;border:none;padding:10px 18px;border-radius:8px;cursor:pointer;margin:5px;font-weight:700}
+.btn:hover{background:#1a4a7a}
 .btn.dark{background:#e94560}
-.card{background:#16213e;padding:15px;border-radius:12px;margin:10px 0}
-input{width:100%;padding:10px;margin:6px 0;border-radius:8px;border:none;outline:none}
+.card{background:#16213e;padding:15px;border-radius:12px;margin:12px 0;border:1px solid #ffffff11}
+input{width:100%;padding:11px;margin:6px 0;border-radius:8px;border:none;outline:none;background:#0a0e1a;color:#fff;border:1px solid #ffffff22}
 #loginBox{max-width:380px;margin:60px auto;padding:20px}
 .hidden{display:none}
-#booksList a{color:#4fc3f7}
+a{color:#4fc3f7;text-decoration:none}
+#installBtn{background:#00c853;display:none;width:100%;margin-top:10px}
 </style>
+
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
+
 <header>
 <h2>🇸🇸 SSNPS Police Academy</h2>
-<p style="opacity:.7;font-size:13px">Training Management System V12</p>
+<p style="opacity:.7;font-size:12px">Training Management System V12 - PWA Ready</p>
 </header>
 
+<!-- Login -->
 <div id="loginBox" class="card">
 <h3>Login</h3>
 <input id="userId" placeholder="ID e.g. SSNPS-5293">
 <input id="userPass" type="password" placeholder="Password e.g. 5293">
 <button class="btn" id="loginBtn" style="width:100%">Login</button>
-<p id="loginMsg" style="margin-top:8px;color:#ff6b6b"></p>
+<button class="btn" id="installBtn">📲 تثبيت التطبيق</button>
+<p id="loginMsg" style="margin-top:8px;color:#ff6b6b;font-size:13px"></p>
 </div>
 
+<!-- App -->
 <div id="appBox" class="hidden" style="padding:15px;max-width:900px;margin:auto">
-<div style="display:flex;justify-content:space-between;align-items:center">
+<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap">
 <h3 id="welcome"></h3>
 <button class="btn dark" id="logoutBtn">Logout</button>
 </div>
@@ -48,7 +57,7 @@ input{width:100%;padding:10px;margin:6px 0;border-radius:8px;border:none;outline
 <h3>👮 Add New Soldier</h3>
 <input id="soldierName" placeholder="Soldier Full Name">
 <button class="btn" id="addSoldierBtn">Generate & Add</button>
-<p id="soldierMsg"></p>
+<p id="soldierMsg" style="font-size:13px;margin-top:6px"></p>
 </div>
 
 <div class="card">
@@ -57,46 +66,40 @@ input{width:100%;padding:10px;margin:6px 0;border-radius:8px;border:none;outline
 </div>
 
 <div class="card">
-<h3>📚 Police Library - Add Book (Free Method)</h3>
-<p style="font-size:12px;opacity:.7;margin-bottom:8px">1. ارفع الـ PDF في فولدر books في GitHub<br>2. اكتب الرابط هنا e.g. books/criminal-law.pdf</p>
+<h3>📚 Police Library</h3>
+<p style="font-size:11px;opacity:.6;margin-bottom:8px">ارفع الـ PDF في فولدر books في GitHub ثم اكتب رابطو هنا</p>
 <input id="pdfTitle" placeholder="اسم الكتاب e.g. Criminal Law">
 <input id="pdfUrl" placeholder="رابط الكتاب e.g. books/criminal-law.pdf">
-<button class="btn dark" id="addBookBtn">Add Book to Library</button>
-<p id="uploadStatus"></p>
-<div id="booksList" style="margin-top:10px"></div>
+<button class="btn dark" id="addBookBtn" style="width:100%">Add Book to Library</button>
+<p id="uploadStatus" style="font-size:13px;margin-top:6px"></p>
+<div id="booksList" style="margin-top:12px"></div>
 </div>
 </div>
 
 <script>
-// --- Firebase Config (حقك) ---
+// Firebase - استخدم الكونفج حقك لو عندك
 const firebaseConfig = {
-  apiKey: "AIzaSyCqM1oJ3o0X8X8X8X8X8X8X8X",
+  apiKey: "AIzaSyDummyKey-Replace-With-Real",
   authDomain: "ssnps-police-app-7018f.firebaseapp.com",
   projectId: "ssnps-police-app-7018f",
   storageBucket: "ssnps-police-app-7018f.firebasestorage.app",
   messagingSenderId: "123456789",
   appId: "1:123456789:web:abcdef"
 };
-// استخدم الكونفج الحقيقي من Firebase Console > Project Settings
-// لو عندك الكونفج القديم خليهو هنا
 try{ firebase.initializeApp(firebaseConfig); }catch(e){}
 const db = firebase.firestore();
-
-function sanitize(t){ return t.replace(/[<>]/g,''); }
-
+const sanitize = t => t.replace(/[<>]/g,'');
 let currentUser=null;
-const defaultUsers={
- "SSNPS-5293":{pass:"5293", role:"admin", name:"Admin"},
- "SSNPS-0001":{pass:"0001", role:"soldier", name:"Soldier 1"}
-};
+const defaultUsers={"SSNPS-5293":{pass:"5293",role:"admin",name:"Admin"},"SSNPS-0001":{pass:"0001",role:"soldier",name:"Soldier 1"}};
 
 async function login(){
  const id=sanitize(document.getElementById('userId').value.trim());
  const pass=document.getElementById('userPass').value.trim();
- if(defaultUsers[id] && defaultUsers[id].pass===pass){
-   currentUser={id:id,...defaultUsers[id]};
-   showApp(); return;
- }
+ if(defaultUsers[id] && defaultUsers[id].pass===pass){ currentUser={id,...defaultUsers[id]}; showApp(); return; }
+ try{
+  const doc=await db.collection('soldiers').doc(id).get();
+  if(doc.exists){ currentUser={id,...doc.data()}; showApp(); return; }
+ }catch(e){}
  document.getElementById('loginMsg').textContent='Invalid ID or Password';
 }
 function showApp(){
@@ -105,54 +108,47 @@ function showApp(){
  document.getElementById('welcome').textContent='Welcome: '+currentUser.name+' ('+currentUser.id+')';
  loadSoldiers(); loadBooks();
 }
-function logout(){ location.reload(); }
-
-async function addSoldier(){
+document.getElementById('loginBtn').onclick=login;
+document.getElementById('logoutBtn').onclick=()=>location.reload();
+document.getElementById('addSoldierBtn').onclick=async()=>{
  const name=sanitize(document.getElementById('soldierName').value.trim());
  if(!name){ document.getElementById('soldierMsg').textContent='اكتب الاسم'; return; }
  const newId='SSNPS-'+Math.floor(1000+Math.random()*9000);
- try{
-  await db.collection('soldiers').doc(newId).set({name:name, id:newId, created:Date.now()});
-  document.getElementById('soldierMsg').textContent='✅ تمت إضافة '+name+' : '+newId;
-  document.getElementById('soldierName').value='';
-  loadSoldiers();
- }catch(e){ document.getElementById('soldierMsg').textContent='Error: '+e.message; }
-}
+ try{ await db.collection('soldiers').doc(newId).set({name,id:newId,created:Date.now()}); document.getElementById('soldierMsg').textContent='✅ تمت إضافة '+name+' : '+newId; document.getElementById('soldierName').value=''; loadSoldiers(); }catch(e){ document.getElementById('soldierMsg').textContent='Error: '+e.message; }
+};
 async function loadSoldiers(){
- const snap=await db.collection('soldiers').orderBy('created','desc').get();
- let html='<b>Total: '+snap.size+'</b><br><br>';
- snap.forEach(d=>{ const x=d.data(); html+=`<div style="padding:8px;border-bottom:1px solid #ffffff22">${x.name} - <b>${x.id}</b></div>`; });
- document.getElementById('soldiersList').innerHTML=html||'No soldiers';
+ try{
+  const snap=await db.collection('soldiers').orderBy('created','desc').get();
+  let html='<b>Total: '+snap.size+'</b><br><br>';
+  snap.forEach(d=>{ const x=d.data(); html+=`<div style="padding:8px;border-bottom:1px solid #ffffff22">${x.name} - <b>${x.id}</b></div>`; });
+  document.getElementById('soldiersList').innerHTML=html||'No soldiers';
+ }catch(e){ document.getElementById('soldiersList').innerHTML='Offline mode'; }
 }
-async function addBook(){
+document.getElementById('addBookBtn').onclick=async()=>{
  const title=sanitize(document.getElementById('pdfTitle').value.trim());
  const url=sanitize(document.getElementById('pdfUrl').value.trim());
  if(!title||!url){ alert('اكتب الاسم والرابط'); return; }
- try{
-  await db.collection('library').add({title:title, url:url, created:Date.now()});
-  document.getElementById('uploadStatus').textContent='✅ تمت إضافة '+title;
-  document.getElementById('pdfTitle').value=''; document.getElementById('pdfUrl').value='';
-  loadBooks();
- }catch(e){ document.getElementById('uploadStatus').textContent='Error: '+e.message; }
-}
+ try{ await db.collection('library').add({title,url,created:Date.now()}); document.getElementById('uploadStatus').textContent='✅ تمت إضافة '+title; document.getElementById('pdfTitle').value=''; document.getElementById('pdfUrl').value=''; loadBooks(); }catch(e){ document.getElementById('uploadStatus').textContent='Error: '+e.message; }
+};
 async function loadBooks(){
- const snap=await db.collection('library').orderBy('created','desc').get();
- let html='';
- if(snap.empty) html='لا يوجد كتب بعد';
- snap.forEach(doc=>{
-  const d=doc.data();
-  html+=`<div style="padding:10px;border-bottom:1px solid #ffffff22"><b>${d.title}</b><br><a href="${d.url}" target="_blank">📖 قراءة / تحميل PDF</a></div>`;
- });
- document.getElementById('booksList').innerHTML=html;
+ try{
+  const snap=await db.collection('library').orderBy('created','desc').get();
+  let html=snap.empty?'لا يوجد كتب بعد':'';
+  snap.forEach(doc=>{ const d=doc.data(); html+=`<div style="padding:10px;border-bottom:1px solid #ffffff22"><b>${d.title}</b><br><a href="${d.url}" target="_blank">📖 قراءة / تحميل</a></div>`; });
+  document.getElementById('booksList').innerHTML=html;
+ }catch(e){ document.getElementById('booksList').innerHTML='Offline'; }
 }
-document.getElementById('loginBtn').addEventListener('click',login);
-document.getElementById('logoutBtn').addEventListener('click',logout);
-document.getElementById('addSoldierBtn').addEventListener('click',addSoldier);
-document.getElementById('addBookBtn').addEventListener('click',addBook);
 
-// PWA Service Worker
+// PWA Install
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt',e=>{ e.preventDefault(); deferredPrompt=e; document.getElementById('installBtn').style.display='block'; });
+document.getElementById('installBtn').onclick=async()=>{ if(deferredPrompt){ deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt=null; document.getElementById('installBtn').style.display='none'; } };
+
+// Service Worker - مكانو الصحيح هنا قبل </body>
 if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('./sw.js');
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('/sw.js').then(()=>console.log('SW Ready')).catch(()=>navigator.serviceWorker.register('./sw.js'));
+  });
 }
 </script>
 </body>
