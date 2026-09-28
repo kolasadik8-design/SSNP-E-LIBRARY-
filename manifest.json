@@ -1,0 +1,11 @@
+{
+  "name": "SSNPS POLICE APP PRO",
+  "short_name": "SSNPS",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#16213e",
+  "theme_color": "#16213e",
+  "icons": [
+    {"src": "icons/icon-512.png","sizes":"512x512","type":"image/png"}
+  ]
+}
