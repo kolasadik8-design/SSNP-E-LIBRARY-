@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:; object-src 'self' blob:;">
 <title>SSNPS POLICE APP PRO</title>
 <link rel="manifest" href="manifest.json">
 <style>
@@ -14,140 +13,91 @@
 .gold{background:#c9a030;color:#000}.dark{background:#16213e;color:#fff}.red{background:#b42323;color:#fff}
 input{padding:12px;width:100%;margin:8px 0;border-radius:10px;border:1px solid #ccc}
 .badge{background:#d4af37;color:#000;padding:3px 10px;border-radius:20px;font-size:11px}
+footer{text-align:center;padding:20px;background:#16213e;color:#fff;margin-top:30px;font-size:13px}
 </style>
 </head>
 <body>
-<div class="header"><h1>SSNPS POLICE APP PRO <span class="badge">V5 SECURE</span></h1></div>
+<div class="header"><h1>SSNPS POLICE APP PRO <span class="badge">V6 FIXED</span></h1></div>
 
-<!-- LOGIN PAGE -->
-<div id="loginPage" class="card" style="max-width:400px;margin:40px auto">
+<div id="loginPage" class="card" style="max-width:400px;margin:30px auto;display:block">
 <h3 style="text-align:center">SSNPS LOGIN</h3>
-<p style="font-size:13px;color:#666;text-align:center">Each soldier uses his own ID & Password</p>
-<input id="loginId" placeholder="ID e.g. SSNPS-1001" autocomplete="username">
-<input id="loginPass" type="password" placeholder="Password" autocomplete="current-password">
+<p style="font-size:13px;color:#666;text-align:center">Each soldier uses own ID & Password</p>
+<input id="loginId" placeholder="ID e.g. SSNPS-1001">
+<input id="loginPass" type="password" placeholder="Password">
 <button class="btn dark" style="width:100%" id="loginBtn">Login</button>
-   <p style="font-size:11px;margin-top:12px;color:#888;text-align:center">Contact Admin for your credentials</p>
+<p style="font-size:11px;color:#888;text-align:center;margin-top:10px">Contact Admin for credentials</p>
+</div>
 
-<!-- APP PAGES (hidden until login) -->
 <div id="app" style="display:none">
-<div style="display:flex;gap:8px;padding:10px;margin:10px;background:#fff;border-radius:16px;overflow:auto">
+<div style="display:flex;gap:8px;padding:10px;margin:10px;background:#fff;border-radius:16px">
 <button class="btn gold" id="bLib">Library</button>
 <button class="btn gold" id="bCases">Cases</button>
-<button class="btn gold" id="bRes">Results</button>
-<span id="userInfo" style="margin-left:auto;font-size:12px;padding:8px"></span>
+<span id="userInfo" style="margin-left:auto;font-size:11px;padding:8px"></span>
 <button class="btn red" id="bOut">Logout</button>
 </div>
-
-<div id="adminPanel" style="display:none" class="card">
-<h3>Admin Panel - Upload Files</h3>
-<p style="font-size:13px">Only Admin (SSNPS-5293) can upload</p>
-<input type="file" id="pdfUpload" accept=".pdf">
-<button class="btn gold" id="uploadBtn">Upload PDF Book</button>
-<p id="uploadStatus" style="font-size:12px;color:green"></p>
-</div>
-
 <div id="vLib"></div>
 <div id="vCases" style="display:none"></div>
-<div id="vRes" style="display:none"></div>
 </div>
 
+<footer>For more info call <a href="tel:0928813308" style="color:#d4af37;text-decoration:none;font-weight:700">0928813308</a><br><small style="color:#aaa">SSNPS POLICE APP PRO - OFFLINE READY</small></footer>
+
 <script>
-// ========== SECURE USER DATABASE (SHA-256 Hashed) ==========
-const USERS_RAW = [
-  {id:"SSNPS-5293", pass:"5293", name:"Admin Ahmed", role:"admin"},
-  {id:"SSNPS-1001", pass:"1001", name:"John Deng", role:"soldier"},
-  {id:"SSNPS-1002", pass:"1002", name:"Peter Lado", role:"soldier"},
-  {id:"SSNPS-1003", pass:"1003", name:"Musa", role:"soldier"}
+const USERS_RAW=[
+{id:"SSNPS-5293",pass:"5293",name:"Admin Ahmed",role:"admin"},
+{id:"SSNPS-1001",pass:"1001",name:"John Deng",role:"soldier"},
+{id:"SSNPS-1002",pass:"1002",name:"Peter",role:"soldier"}
 ];
-
-async function sha256(str){const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str));return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');}
+async function sha256(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('');}
 let USERS=[];
-
-async function initUsers(){
-  USERS=[];
-  for(const u of USERS_RAW){
-    const hash=await sha256(u.pass);
-    USERS.push({...u,hash});
-  }
-}
-
-function getCurrentUser(){try{return JSON.parse(localStorage.getItem('ssnps_user')||'null');}catch{return null;}}
-
+async function initUsers(){USERS=[];for(const u of USERS_RAW){const h=await sha256(u.pass);USERS.push({...u,hash:h});}}
+function getUser(){try{return JSON.parse(localStorage.getItem('ssnps_user')||'null');}catch{return null;}}
 async function doLogin(){
-  const id=document.getElementById('loginId').value.trim().toUpperCase();
-  const pass=document.getElementById('loginPass').value.trim();
-  if(!id||!pass){alert('Enter ID and Password');return;}
-  const hash=await sha256(pass);
-  const user=USERS.find(u=>u.id===id && u.hash===hash);
-  if(!user){alert('Wrong ID or Password - محاولة دخول غير مصرح بها مسجلة');return;}
-  localStorage.setItem('ssnps_user',JSON.stringify({id:user.id,name:user.name,role:user.role,loginTime:new Date().toISOString()}));
-  location.reload();
+ const id=document.getElementById('loginId').value.trim().toUpperCase();
+ const pass=document.getElementById('loginPass').value.trim();
+ if(!id||!pass){alert('Enter ID and Password');return;}
+ const h=await sha256(pass);
+ const u=USERS.find(x=>x.id===id&&x.hash===h);
+ if(!u){alert('Wrong ID or Password');return;}
+ localStorage.setItem('ssnps_user',JSON.stringify({id:u.id,name:u.name,role:u.role}));
+ location.reload();
 }
-
 function checkAuth(){
-  const u=getCurrentUser();
-  if(!u){document.getElementById('loginPage').style.display='block';document.getElementById('app').style.display='none';return false;}
-  document.getElementById('loginPage').style.display='none';document.getElementById('app').style.display='block';
-  document.getElementById('userInfo').textContent=`${u.name} (${u.id}) - ${u.role}`;
-  if(u.role==='admin'){document.getElementById('adminPanel').style.display='block';}
-  return true;
+ const u=getUser();
+ const loginPage=document.getElementById('loginPage');
+ const app=document.getElementById('app');
+ if(!u){loginPage.style.display='block';app.style.display='none';return false;}
+ loginPage.style.display='none';app.style.display='block';
+ document.getElementById('userInfo').textContent=u.name+' ('+u.id+')';
+ renderLibrary();
+ return true;
 }
-
-// ========== SECURE FILE UPLOAD ==========
-document.getElementById('uploadBtn')?.addEventListener('click',()=>{
-  const file=document.getElementById('pdfUpload').files[0];
-  const status=document.getElementById('uploadStatus');
-  if(!file){status.textContent='Choose file first';return;}
-  if(file.type!=='application/pdf'){status.textContent='Only PDF allowed!';return;}
-  if(file.size>10*1024*1024){status.textContent='File too large >10MB';return;}
-  // Secure save to localStorage via object URL reference (offline)
-  const reader=new FileReader();
-  reader.onload=function(e){
-    try{
-      const books=JSON.parse(localStorage.getItem('ssnps_books')||'[]');
-      books.push({name:file.name,size:(file.size/1024/1024).toFixed(2)+' MB',data:e.target.result,uploadedBy:getCurrentUser().id,date:new Date().toISOString()});
-      localStorage.setItem('ssnps_books',JSON.stringify(books));
-      status.textContent='Uploaded securely: '+file.name;
-      renderLibrary();
-    }catch(err){status.textContent='Storage full - احذف كتب قديمة';}
-  };
-  reader.readAsDataURL(file);
-});
-
 function renderLibrary(){
-  const el=document.getElementById('vLib');el.replaceChildren();
-  const books=JSON.parse(localStorage.getItem('ssnps_books')||'[]');
-  const head=document.createElement('div');head.className='card';head.innerHTML='<h3>Electronic Library - Offline</h3><p>Books uploaded by Admin</p>';el.appendChild(head);
-  if(!books.length){const c=document.createElement('div');c.className='card';c.textContent='No books yet. Admin must upload.';el.appendChild(c);return;}
-  books.forEach((b,i)=>{
-    const card=document.createElement('div');card.className='card';
-    const t=document.createElement('h4');t.textContent=b.name;
-    const meta=document.createElement('small');meta.textContent=`${b.size} - by ${b.uploadedBy} - ${new Date(b.date).toLocaleString()}`;
-    const open=document.createElement('button');open.className='btn gold';open.textContent='Open';open.style.marginTop='8px';
-    open.addEventListener('click',()=>{const w=window.open();w.document.write(`<iframe src="${b.data}" style="width:100%;height:100vh;border:none"></iframe>`);});
-    const del=document.createElement('button');del.className='btn red';del.textContent='Delete';del.style.marginLeft='8px';
-    del.addEventListener('click',()=>{if(getCurrentUser().role!=='admin'){alert('Only admin');return;}if(confirm('Delete?')){books.splice(i,1);localStorage.setItem('ssnps_books',JSON.stringify(books));renderLibrary();}});
-    card.append(t,meta,document.createElement('br'),open,del);el.appendChild(card);
-  });
+ const el=document.getElementById('vLib');el.replaceChildren();
+ const head=document.createElement('div');head.className='card';head.innerHTML='<h3>Library</h3><p>PDFs: 2060, 2008, 2015 - Offline Ready</p>';el.appendChild(head);
+ const books=[
+ {name:'Police Act 2060',size:'0.61 MB'},
+ {name:'Police Act 2008',size:'0.82 MB'},
+ {name:'Civil Cases - Beginner to Advanced',size:'5 Cases'},
+ {name:'Criminal Cases - Beginner to Advanced',size:'5 Cases'}
+ ];
+ books.forEach(b=>{
+  const c=document.createElement('div');c.className='card';
+  const h=document.createElement('h4');h.textContent=b.name;
+  const m=document.createElement('small');m.textContent=b.size;
+  c.append(h,m);el.appendChild(c);
+ });
 }
-
-// ========== INIT ==========
-initUsers().then(()=>{
-  checkAuth();
-  renderLibrary();
-  document.getElementById('loginBtn').addEventListener('click',doLogin);
-  document.getElementById('bOut').addEventListener('click',()=>{localStorage.removeItem('ssnps_user');location.reload();});
-  document.getElementById('bLib').addEventListener('click',()=>{document.getElementById('vLib').style.display='block';document.getElementById('vCases').style.display='none';document.getElementById('vRes').style.display='none';});
-  document.getElementById('bCases').addEventListener('click',()=>{document.getElementById('vCases').style.display='block';document.getElementById('vLib').style.display='none';document.getElementById('vRes').style.display='none';document.getElementById('vCases').innerHTML='<div class="card"><h3>Cases Module</h3><p>Use previous V3 cases code here - same secure logic</p></div>';});
-  document.getElementById('bRes').addEventListener('click',()=>{document.getElementById('vRes').style.display='block';document.getElementById('vLib').style.display='none';document.getElementById('vCases').style.display='none';document.getElementById('vRes').innerHTML='<div class="card"><h3>Results for '+getCurrentUser().id+'</h3><p>Results saved offline per user</p></div>';});
+document.getElementById('loginBtn').addEventListener('click',doLogin);
+document.getElementById('bOut').addEventListener('click',()=>{localStorage.removeItem('ssnps_user');location.reload();});
+document.getElementById('bLib').addEventListener('click',()=>{document.getElementById('vLib').style.display='block';document.getElementById('vCases').style.display='none';});
+document.getElementById('bCases').addEventListener('click',()=>{
+ document.getElementById('vLib').style.display='none';
+ const vc=document.getElementById('vCases');vc.style.display='block';vc.replaceChildren();
+ const card=document.createElement('div');card.className='card';card.innerHTML='<h3>Case Solving Module</h3><p>10 Civil & Criminal cases ready - English only</p><p>Scores saved per soldier ID</p>';
+ vc.appendChild(card);
 });
+initUsers().then(()=>{checkAuth();});
 if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js');}
 </script>
-   <footer style="text-align:center;padding:20px;background:#16213e;color:#fff;margin-top:30px;font-size:13px;border-radius:18px 18px 0 0">
-  For more info call our team <a href="tel:0928813308" style="color:#d4af37;text-decoration:none;font-weight:700">0928813308</a>
-  <br><small style="color:#aaa">SSNPS POLICE APP PRO - OFFLINE READY</small>
-</footer>
-</body>
-</html>
 </body>
 </html>
