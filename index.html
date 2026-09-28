@@ -1,33 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; object-src 'none'; base-uri 'self'">
-<title>SSNPS POLICE APP PRO</title>
-<link rel="manifest" href="manifest.json">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SSNPS POLICE APP PRO - FIREBASE</title>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
 <style>
 *{box-sizing:border-box;font-family:Inter,system-ui}body{margin:0;background:#eef2f7}
 .header{background:#16213e;color:#fff;text-align:center;padding:16px}
 .card{background:#fff;border-radius:18px;padding:14px;margin:10px;box-shadow:0 2px 8px #0001}
-.btn{border:none;padding:9px 14px;border-radius:12px;font-weight:700;cursor:pointer}
+.btn{border:none;padding:10px 16px;border-radius:12px;font-weight:700;cursor:pointer}
 .gold{background:#c9a030;color:#000}.dark{background:#16213e;color:#fff}.red{background:#b42323;color:#fff}
-input,textarea,select{padding:11px;width:100%;margin:6px 0;border-radius:10px;border:1px solid #ccc}
+input{padding:11px;width:100%;margin:6px 0;border-radius:10px;border:1px solid #ccc}
 .badge{background:#d4af37;color:#000;padding:3px 10px;border-radius:20px;font-size:11px}
-.gen-box{background:#f0fdf4;border:1px dashed #16a34a;padding:12px;border-radius:12px;margin:8px 0;font-family:monospace}
-footer{text-align:center;padding:18px;background:#16213e;color:#fff;margin-top:20px;font-size:13px}
+.gen-box{background:#f0fdf4;border:2px dashed #16a34a;padding:12px;border-radius:12px;margin:10px 0;font-family:monospace}
+footer{text-align:center;padding:18px;background:#16213e;color:#fff;margin-top:20px}
 </style>
 </head>
 <body>
-<div class="header"><h1>SSNPS POLICE APP PRO <span class="badge">V9 AUTO-GEN</span></h1></div>
+<div class="header"><h1>SSNPS POLICE APP <span class="badge">V10 FIREBASE LIVE</span></h1></div>
 
 <div id="loginPage" class="card" style="max-width:400px;margin:30px auto">
 <h3 style="text-align:center">SSNPS LOGIN</h3>
-<input id="loginId" placeholder="ID e.g. SSNPS-1001" maxlength="12">
-<input id="loginPass" type="password" placeholder="Password" maxlength="20">
-<button class="btn dark" style="width:100%" id="loginBtn">Login</button>
-<p id="loginErr" style="color:red;font-size:12px;text-align:center"></p>
-<p style="font-size:11px;color:#888;text-align:center">Contact Admin: 0928813308</p>
+<input id="loginId" placeholder="ID e.g. SSNPS-5293"><input id="loginPass" type="password" placeholder="Password">
+<button class="btn dark" style="width:100%" id="loginBtn">Login</button><p id="loginErr" style="color:red;font-size:12px;text-align:center"></p>
 </div>
 
 <div id="app" style="display:none">
@@ -35,161 +31,110 @@ footer{text-align:center;padding:18px;background:#16213e;color:#fff;margin-top:2
 <button class="btn gold" id="bLib">Library</button>
 <button class="btn gold" id="bCases">Cases</button>
 <button class="btn gold" id="bRes">Results</button>
-<span id="userInfo" style="font-size:11px;padding:6px;margin-left:auto"></span>
+<span id="userInfo" style="margin-left:auto;font-size:11px;padding:6px"></span>
 <button class="btn red" id="bOut">Logout</button>
 </div>
 
 <div id="adminPanel" class="card" style="display:none;border:2px dashed #c9a030">
-<h3>Admin Panel - Soldier Management</h3>
-<input id="searchSold" placeholder="🔍 Search by name or ID..." style="background:#f8fafc">
-<div style="display:flex;gap:6px">
-<input id="newSoldName" placeholder="Full Name e.g. Ali Hassan Wani" maxlength="40">
-<button class="btn dark" id="addSoldBtn" style="width:140px">Generate & Add</button>
-</div>
-<div id="genResult"></div>
-<p id="soldStatus" style="font-size:12px;color:green"></p>
-<div id="soldList" style="font-size:12px"></div>
-<hr>
-<b>Upload PDF</b>
-<input type="file" id="pdfUpload" accept="application/pdf"><button class="btn gold" id="uploadBtn">Upload (10MB max)</button>
-<p id="uploadStatus" style="font-size:12px;color:green"></p>
+<h3>👮 Admin - Add Soldier (Auto Generate)</h3>
+<input id="searchSold" placeholder="🔍 بحث باسم المستجد أو الـ ID..." style="background:#f8fafc">
+<div style="display:flex;gap:6px;margin-top:8px"><input id="newSoldName" placeholder="Full Name e.g. Ali Hassan" maxlength="40"><button class="btn dark" id="addSoldBtn" style="width:170px">Generate & Add</button></div>
+<div id="genResult"></div><p id="soldStatus" style="font-size:12px;color:green"></p><div id="soldList" style="font-size:13px;margin-top:8px"></div>
 </div>
 
-<div id="vLib"></div>
-<div id="vCases" style="display:none"></div>
-<div id="vRes" style="display:none"></div>
+<div id="vLib" class="card"><h3>Dashboard</h3><p id="status">Connecting to Firebase...</p></div>
+<div id="vCases" style="display:none" class="card"><h3>Cases Module - 10 Civil/Criminal Cases Ready</h3></div>
+<div id="vRes" style="display:none" class="card"><h3>Results</h3><p>Saved in Firestore</p></div>
 </div>
 
-<footer>For more info call <a href="tel:0928813308" style="color:#d4af37;text-decoration:none">0928813308</a></footer>
+<footer>For more info call <a href="tel:0928813308" style="color:#d4af37;text-decoration:none;font-weight:700">0928813308</a></footer>
 
 <script>
-const USERS_RAW=[
-{id:"SSNPS-5293",pass:"5293",name:"Admin Ahmed",role:"admin"},
-{id:"SSNPS-1001",pass:"1001",name:"John Deng",role:"soldier"}
-];
+const firebaseConfig = {
+  apiKey: "AIzaSyDbPsfTygtodq8THsbSNZ4y2UTO0qHgr_4",
+  authDomain: "ssnps-police-app-7018f.firebaseapp.com",
+  projectId: "ssnps-police-app-7018f",
+  storageBucket: "ssnps-police-app-7018f.firebasestorage.app",
+  messagingSenderId: "705275454318",
+  appId: "1:705275454318:web:a3cb76139563b6c33d977f"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+const USERS_RAW=[{id:"SSNPS-5293",pass:"5293",name:"Admin Ahmed",role:"admin"}];
 async function sha256(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('');}
 function sanitize(str){return (str||'').replace(/[<>"'`;]/g,'').trim();}
-function getCustomUsers(){try{return JSON.parse(localStorage.getItem('ssnps_custom_users_v9')||'[]');}catch{return [];}}
-function saveCustomUsers(a){localStorage.setItem('ssnps_custom_users_v9',JSON.stringify(a));}
-let USERS=[], loginAttempts=0, lastAttempt=0;
+let USERS=[];let ready=false;
+
 async function initUsers(){
  USERS=[];
- for(const u of USERS_RAW){const h=await sha256(u.pass);USERS.push({id:u.id,name:u.name,role:u.role,hash:h,plain:u.pass});}
- const custom=getCustomUsers();
- custom.forEach(u=>{if(!USERS.find(x=>x.id===u.id))USERS.push(u);});
+ for(const u of USERS_RAW){USERS.push({id:u.id,name:u.name,role:u.role,hash:await sha256(u.pass),plain:u.pass});}
+ try{
+  const snap=await db.collection('soldiers').get();
+  snap.forEach(doc=>{const d=doc.data();if(!USERS.find(x=>x.id===d.id))USERS.push(d);});
+  document.getElementById('status').textContent='✅ Firebase Connected - '+USERS.length+' soldiers - Dashboard Ready';
+ }catch(e){
+  document.getElementById('status').textContent='⚠️ Firestore not enabled yet - Enable it in console. '+e.message;
+ }
+ ready=true;
+ checkAuth();
 }
 function getUser(){try{return JSON.parse(localStorage.getItem('ssnps_user')||'null');}catch{return null;}}
-function generateId(){
- const existing=USERS.map(u=>{const m=u.id.match(/SSNPS-(\d+)/);return m?parseInt(m[1]):0;});
- const max=Math.max(5293,1001,...existing,1000);
- return 'SSNPS-'+(max+1);
-}
-function generatePass(){
- const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
- let p='';for(let i=0;i<6;i++)p+=chars[Math.floor(Math.random()*chars.length)];
- return p;
-}
+function genId(){const nums=USERS.map(u=>{const m=u.id.match(/(\d+)/);return m?parseInt(m[1]):0;});return 'SSNPS-'+(Math.max(...nums,1000)+1);}
+function genPass(){const c='ABCDEFGHJKLMNP23456789';let p='';for(let i=0;i<6;i++)p+=c[Math.floor(Math.random()*c.length)];return p;}
+
 async function doLogin(){
- const now=Date.now();
- if(loginAttempts>=5 && now-lastAttempt<60000){document.getElementById('loginErr').textContent='Too many tries. Wait 1 min';return;}
+ if(!ready){document.getElementById('loginErr').textContent='Loading...';return;}
  const id=sanitize(document.getElementById('loginId').value).toUpperCase();
  const pass=sanitize(document.getElementById('loginPass').value);
- if(!id||!pass){document.getElementById('loginErr').textContent='Enter ID and Password';return;}
- if(!/^SSNPS-\d{3,6}$/.test(id)){document.getElementById('loginErr').textContent='Invalid ID format';return;}
+ if(!id||!pass){document.getElementById('loginErr').textContent='Enter ID & Pass';return;}
  const h=await sha256(pass);
  const u=USERS.find(x=>x.id===id&&x.hash===h);
- if(!u){loginAttempts++;lastAttempt=now;document.getElementById('loginErr').textContent='Wrong ID or Password ('+loginAttempts+'/5)';return;}
- loginAttempts=0;
+ if(!u){document.getElementById('loginErr').textContent='Wrong ID or Password';return;}
  localStorage.setItem('ssnps_user',JSON.stringify({id:u.id,name:u.name,role:u.role}));
- location.reload();
+ checkAuth();
 }
 function checkAuth(){
  const u=getUser();
- if(!u){document.getElementById('loginPage').style.display='block';document.getElementById('app').style.display='none';return false;}
- document.getElementById('loginPage').style.display='none';document.getElementById('app').style.display='block';
+ const lp=document.getElementById('loginPage');const app=document.getElementById('app');
+ if(!u){lp.style.display='block';app.style.display='none';return;}
+ lp.style.display='none';app.style.display='block';
  document.getElementById('userInfo').textContent=u.name+' ('+u.id+')';
  if(u.role==='admin'){document.getElementById('adminPanel').style.display='block';renderSoldList();}
- renderLibrary();return true;
-}
-function renderLibrary(){
- const el=document.getElementById('vLib');el.replaceChildren();
- const books=JSON.parse(localStorage.getItem('ssnps_books')||'[]');
- const head=document.createElement('div');head.className='card';const h=document.createElement('h3');h.textContent='Library - '+books.length+' Books';head.appendChild(h);el.appendChild(head);
- books.forEach((b,i)=>{
-  const card=document.createElement('div');card.className='card';
-  const name=document.createElement('h4');name.textContent=b.name;
-  const meta=document.createElement('small');meta.textContent=b.size+' by '+b.by;
-  const open=document.createElement('button');open.className='btn gold';open.textContent='Open';open.addEventListener('click',()=>{const w=window.open();w.document.write('<iframe src="'+b.data+'" style="width:100%;height:100vh;border:none"></iframe>');});
-  card.append(name,meta,document.createElement('br'),open);el.appendChild(card);
- });
 }
 function renderSoldList(filter=''){
- const el=document.getElementById('soldList');const custom=getCustomUsers();
- let list=USERS.filter(u=>u.role==='soldier');
+ const el=document.getElementById('soldList');let list=USERS.filter(u=>u.role!=='admin');
  if(filter){const f=filter.toLowerCase();list=list.filter(u=>u.name.toLowerCase().includes(f)||u.id.toLowerCase().includes(f));}
- el.replaceChildren();
- const title=document.createElement('div');title.textContent='Soldiers: '+list.length+' (Search: '+(filter||'All')+')';title.style.fontWeight='700';el.appendChild(title);
- list.slice(0,50).forEach(u=>{
-  const row=document.createElement('div');row.style.display='flex';row.style.justifyContent='space-between';row.style.padding='6px 0';row.style.borderBottom='1px solid #eee';
-  const info=document.createElement('span');info.textContent=u.id+' - '+u.name+' | Pass: '+(u.plain||'****');
-  const del=document.createElement('button');del.className='btn red';del.textContent='X';del.style.padding='2px 8px';
-  del.addEventListener('click',()=>{if(getUser().id===u.id){alert('Cannot delete self');return;}if(!confirm('Delete '+u.id+'?'))return;let arr=getCustomUsers();arr=arr.filter(x=>x.id!==u.id);saveCustomUsers(arr);initUsers().then(()=>renderSoldList(document.getElementById('searchSold').value));});
-  if(u.role==='soldier'&&!USERS_RAW.find(r=>r.id===u.id)){row.append(info,del);}else{row.appendChild(info);}
-  el.appendChild(row);
- });
+ el.innerHTML='<b>All Soldiers: '+list.length+'</b><div style="max-height:300px;overflow:auto;margin-top:6px">'+list.map(u=>'<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee"><span>'+u.id+' - '+u.name+' | Pass: '+(u.plain||'***')+'</span><button onclick="delSold(\''+u.id+'\')" style="background:#fee2e2;border:none;border-radius:6px;padding:2px 8px;cursor:pointer">X</button></div>').join('')+'</div>';
+}
+window.delSold=async function(id){
+ if(!confirm('Delete '+id+'?'))return;
+ if(getUser().id===id){alert('Cannot delete self');return;}
+ try{await db.collection('soldiers').doc(id).delete();USERS=USERS.filter(u=>u.id!==id);renderSoldList(document.getElementById('searchSold').value);}catch(e){alert(e.message);}
 }
 
-// Events
 document.getElementById('loginBtn').addEventListener('click',doLogin);
+document.getElementById('loginPass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
 document.getElementById('bOut').addEventListener('click',()=>{localStorage.removeItem('ssnps_user');location.reload();});
 document.getElementById('bLib').addEventListener('click',()=>{document.getElementById('vLib').style.display='block';document.getElementById('vCases').style.display='none';document.getElementById('vRes').style.display='none';});
-document.getElementById('bCases').addEventListener('click',()=>{document.getElementById('vLib').style.display='none';document.getElementById('vCases').style.display='block';document.getElementById('vRes').style.display='none';document.getElementById('vCases').innerHTML='<div class="card"><h3>10 Cases Ready - Civil/Criminal</h3></div>';});
+document.getElementById('bCases').addEventListener('click',()=>{document.getElementById('vLib').style.display='none';document.getElementById('vCases').style.display='block';document.getElementById('vRes').style.display='none';});
 document.getElementById('bRes').addEventListener('click',()=>{document.getElementById('vLib').style.display='none';document.getElementById('vCases').style.display='none';document.getElementById('vRes').style.display='block';});
-
-document.getElementById('searchSold').addEventListener('input',(e)=>{renderSoldList(e.target.value);});
-
+document.getElementById('searchSold').addEventListener('input',e=>renderSoldList(e.target.value));
 document.getElementById('addSoldBtn').addEventListener('click',async()=>{
- const rawName=document.getElementById('newSoldName').value;
- const name=sanitize(rawName);
+ const raw=document.getElementById('newSoldName').value;const name=sanitize(raw);
  const status=document.getElementById('soldStatus');
- const genDiv=document.getElementById('genResult');
- if(name.length<3){status.textContent='Name must be at least 3 chars';return;}
- const newId=generateId();
- const newPass=generatePass();
- const hash=await sha256(newPass);
- const arr=getCustomUsers();
- arr.push({id:newId,name:name,role:'soldier',hash:hash,plain:newPass});
- saveCustomUsers(arr);await initUsers();
- genDiv.replaceChildren();
- const box=document.createElement('div');box.className='gen-box';
- const t1=document.createElement('div');t1.textContent='✅ Soldier Added Successfully';
- const t2=document.createElement('div');t2.textContent='ID: '+newId;
- const t3=document.createElement('div');t3.textContent='Name: '+name;
- const t4=document.createElement('div');t4.textContent='Password: '+newPass;
- const t5=document.createElement('small');t5.textContent='Copy this to soldier - Will be hidden after refresh';
- box.append(t1,t2,t3,t4,t5);genDiv.appendChild(box);
- status.textContent='Added '+newId;
- document.getElementById('newSoldName').value='';
- renderSoldList();
+ if(name.length<3){status.textContent='Name min 3 chars';return;}
+ const newId=genId();const newPass=genPass();const hash=await sha256(newPass);
+ const data={id:newId,name:name,role:'soldier',hash:hash,plain:newPass,created:Date.now()};
+ try{
+  await db.collection('soldiers').doc(newId).set(data);
+  USERS.push(data);
+  document.getElementById('genResult').innerHTML='<div class=gen-box>✅ <b>تم التوليد بنجاح</b><br>👤 ID (اسم المستخدم): <b>'+newId+'</b><br>🔑 Password: <b>'+newPass+'</b><br>📛 Name: '+name+'<br><small>انسخها للمستجد - محفوظة في Firebase</small></div>';
+  document.getElementById('newSoldName').value='';status.textContent='Added '+newId;renderSoldList();
+ }catch(e){status.textContent='Error: Enable Firestore Database first - '+e.message;alert('روح Firebase Console > Firestore Database > Create database > Start in test mode');}
 });
-
-document.getElementById('uploadBtn').addEventListener('click',()=>{
- const file=document.getElementById('pdfUpload').files[0];const s=document.getElementById('uploadStatus');
- if(!file){s.textContent='Choose file';return;}
- if(file.type!=='application/pdf'||!file.name.toLowerCase().endsWith('.pdf')){s.textContent='Only PDF';return;}
- if(file.size>10*1024*1024){s.textContent='>10MB blocked';return;}
- const reader=new FileReader();
- reader.onload=e=>{
-  try{
-   const books=JSON.parse(localStorage.getItem('ssnps_books')||'[]');
-   books.push({name:file.name,size:(file.size/1024/1024).toFixed(2)+' MB',data:e.target.result,[STRIPPED] Date().toISOString()});
-   localStorage.setItem('ssnps_books',JSON.stringify(books));s.textContent='Uploaded '+file.name;renderLibrary();
-  }catch{s.textContent='Storage full';}
- };reader.readAsDataURL(file);
-});
-
-initUsers().then(checkAuth);
-if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js');}
+initUsers();
+if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister()));}
 </script>
 </body>
 </html>
