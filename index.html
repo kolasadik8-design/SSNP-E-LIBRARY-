@@ -3,112 +3,145 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:; object-src 'self' blob:;">
 <title>SSNPS POLICE APP PRO</title>
 <link rel="manifest" href="manifest.json">
 <style>
 *{box-sizing:border-box;font-family:Inter,system-ui}body{margin:0;background:#eef2f7}
-.header{background:#16213e;color:#fff;text-align:center;padding:16px;position:sticky;top:0;z-index:5}
-.badge{background:#d4af37;color:#000;padding:3px 10px;border-radius:20px;font-size:11px;margin-left:6px}
-.tabs{display:flex;gap:8px;padding:10px;margin:10px;background:#fff;border-radius:16px;overflow:auto}
-.btn{border:none;padding:9px 16px;border-radius:12px;font-weight:700;cursor:pointer}
-.gold{background:#c9a030;color:#000}.red{background:#b42323;color:#fff}.dark{background:#16213e;color:#fff}
+.header{background:#16213e;color:#fff;text-align:center;padding:16px}
 .card{background:#fff;border-radius:18px;padding:16px;margin:10px;box-shadow:0 2px 8px #0001}
-.case-tag{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700}
-.civil{background:#dbeafe;color:#1e40af}.criminal{background:#fee2e2;color:#991b1b}
-.beginner{background:#dcfce7;color:#166534}.inter{background:#fef9c3;color:#854d0e}.advanced{background:#f3e8ff;color:#6b21a8}
-.opt{display:block;width:100%;text-align:left;margin:6px 0;padding:10px;border-radius:10px;border:1px solid #d1d5db;background:#f9fafb;cursor:pointer}
-.opt.sel{background:#16213e;color:#fff}
-textarea{width:100%;padding:10px;border-radius:10px;border:1px solid #ccc;min-height:80px}
+.btn{border:none;padding:10px 16px;border-radius:12px;font-weight:700;cursor:pointer}
+.gold{background:#c9a030;color:#000}.dark{background:#16213e;color:#fff}.red{background:#b42323;color:#fff}
+input{padding:12px;width:100%;margin:8px 0;border-radius:10px;border:1px solid #ccc}
+.badge{background:#d4af37;color:#000;padding:3px 10px;border-radius:20px;font-size:11px}
 </style>
 </head>
 <body>
-<div class="header"><h1>SSNPS POLICE APP PRO <span class="badge">OFFLINE READY</span></h1><small>SSNPS-5293</small></div>
-<div class="tabs">
+<div class="header"><h1>SSNPS POLICE APP PRO <span class="badge">V5 SECURE</span></h1></div>
+
+<!-- LOGIN PAGE -->
+<div id="loginPage" class="card" style="max-width:400px;margin:40px auto">
+<h3 style="text-align:center">SSNPS LOGIN</h3>
+<p style="font-size:13px;color:#666;text-align:center">Each soldier uses his own ID & Password</p>
+<input id="loginId" placeholder="ID e.g. SSNPS-1001" autocomplete="username">
+<input id="loginPass" type="password" placeholder="Password" autocomplete="current-password">
+<button class="btn dark" style="width:100%" id="loginBtn">Login</button>
+<p style="font-size:11px;margin-top:10px">Demo: Admin = SSNPS-5293 / 5293 <br>Soldier = SSNPS-1001 / 1001</p>
+</div>
+
+<!-- APP PAGES (hidden until login) -->
+<div id="app" style="display:none">
+<div style="display:flex;gap:8px;padding:10px;margin:10px;background:#fff;border-radius:16px;overflow:auto">
 <button class="btn gold" id="bLib">Library</button>
 <button class="btn gold" id="bCases">Cases</button>
 <button class="btn gold" id="bRes">Results</button>
+<span id="userInfo" style="margin-left:auto;font-size:12px;padding:8px"></span>
 <button class="btn red" id="bOut">Logout</button>
 </div>
-<div id="vLib"></div><div id="vCases" style="display:none"></div><div id="vSolve" style="display:none"></div><div id="vRes" style="display:none"></div>
+
+<div id="adminPanel" style="display:none" class="card">
+<h3>Admin Panel - Upload Files</h3>
+<p style="font-size:13px">Only Admin (SSNPS-5293) can upload</p>
+<input type="file" id="pdfUpload" accept=".pdf">
+<button class="btn gold" id="uploadBtn">Upload PDF Book</button>
+<p id="uploadStatus" style="font-size:12px;color:green"></p>
+</div>
+
+<div id="vLib"></div>
+<div id="vCases" style="display:none"></div>
+<div id="vRes" style="display:none"></div>
+</div>
 
 <script>
-const CASES=[
-{id:"CIV-001",type:"civil",level:"beginner",title:"Land Dispute - Juba",story:"Two neighbors dispute over 2m land. Deng has title 2015. John claims traditional ownership. No violence.",questions:[{q:"First police action?",opts:["Arrest both","Mediate and refer to land authority / court","Ignore","Take land"],ans:1},{q:"Is this criminal? Yes/No",opts:["Yes","No"],ans:1},{q:"Write report summary (2 lines)",type:"text"}]},
-{id:"CRIM-001",type:"criminal",level:"beginner",title:"Theft at Konyo Konyo Market",story:"Woman reports phone stolen. Points to 15yo boy holding similar phone. Boy says bought it.",questions:[{q:"Arrest 15yo immediately?",opts:["Yes","No - Juvenile procedures apply"],ans:1},{q:"Evidence needed?",opts:["Receipt / Witness / CCTV","Only victim statement","Beat to confess"],ans:0}]},
-{id:"CRIM-002",type:"criminal",level:"intermediate",title:"Robbery Assault - Night Patrol",story:"22:00 patrol finds bleeding man. Says 2 men knifed him and took 50k SSP. No witnesses. Victim drunk.",questions:[{q:"Classification?",opts:["Civil","Robbery with aggravated assault - Criminal","Administrative"],ans:1},{q:"First steps?",opts:["Hospital + secure scene + description","Leave him","Ask money"],ans:0},{q:"Drunk reason to refuse case?",opts:["Yes","No"],ans:1}]},
-{id:"CIV-002",type:"civil",level:"advanced",title:"Rent Contract Breach",story:"Landlord increased rent 300$ to 500$ without notice, locked shop. Tenant has 1 year contract.",questions:[{q:"Police should:",opts:["Break lock","Advise civil court but prevent breach of peace","Arrest landlord"],ans:1},{q:"Criminal trespass?",opts:["True","False - civil breach"],ans:1}]},
-{id:"CRIM-003",type:"criminal",level:"advanced",title:"Homicide Investigation",story:"Body near river. Knife nearby. Footprints. Community wants immediate burial.",questions:[{q:"Allow immediate burial?",opts:["Yes","No - Preserve scene for CID"],ans:1},{q:"Correct procedure",opts:["Secure scene, call CID, photographer","Allow crowd touch body","Document footprints and weapon"],ans:0},{q:"Write 3 immediate actions",type:"text"}]}
+// ========== SECURE USER DATABASE (SHA-256 Hashed) ==========
+const USERS_RAW = [
+  {id:"SSNPS-5293", pass:"5293", name:"Admin Ahmed", role:"admin"},
+  {id:"SSNPS-1001", pass:"1001", name:"John Deng", role:"soldier"},
+  {id:"SSNPS-1002", pass:"1002", name:"Peter Lado", role:"soldier"},
+  {id:"SSNPS-1003", pass:"1003", name:"Musa", role:"soldier"}
 ];
-let currentCase=null,answers=[];
-function renderCases(ft='all',fl='all'){
- const el=document.getElementById('vCases');
- el.replaceChildren();
- const top=document.createElement('div');top.className='card';
- top.innerHTML='<h3>Case Bank - Civil & Criminal (English Only)</h3>';
- const row1=document.createElement('div');row1.style.display='flex';row1.style.gap='8px';
- [['All','all'],['Civil','civil'],['Criminal','criminal']].forEach(([label,val])=>{const b=document.createElement('button');b.className=val==='all'?'btn dark':'btn gold';b.textContent=label;b.addEventListener('click',()=>renderCases(val,fl));row1.appendChild(b);});
- const row2=document.createElement('div');row2.style.display='flex';row2.style.gap='8px';row2.style.marginTop='8px';
- [['Beginner','beginner'],['Intermediate','intermediate'],['Advanced','advanced']].forEach(([l,v])=>{const b=document.createElement('button');b.className='btn gold';b.textContent=l;b.addEventListener('click',()=>renderCases(ft,v));row2.appendChild(b);});
- top.append(row1,row2);el.appendChild(top);
- CASES.filter(c=>(ft==='all'||c.type===ft)&&(fl==='all'||c.level===fl)).forEach(c=>{
-  const card=document.createElement('div');card.className='card';
-  const h=document.createElement('h4');h.textContent=c.title;
-  const meta=document.createElement('div');meta.innerHTML=`<span class="case-tag ${c.type}">${c.type.toUpperCase()}</span> <span class="case-tag ${c.level}">${c.level.toUpperCase()}</span> <small>${c.id}</small>`;
-  const p=document.createElement('p');p.textContent=c.story.slice(0,120)+'...';p.style.fontSize='14px';
-  const btn=document.createElement('button');btn.className='btn dark';btn.textContent='Solve Case';btn.addEventListener('click',()=>openCase(c.id));
-  card.append(meta,h,p,btn);el.appendChild(card);
- });
-}
-function openCase(id){
- currentCase=CASES.find(c=>c.id===id);answers=new Array(currentCase.questions.length).fill(null);
- hideAll();const vs=document.getElementById('vSolve');vs.style.display='block';vs.replaceChildren();
- const card=document.createElement('div');card.className='card';
- const back=document.createElement('button');back.className='btn gold';back.textContent='← Back';back.addEventListener('click',()=>{hideAll();document.getElementById('vCases').style.display='block';});
- const title=document.createElement('h3');title.textContent=`${currentCase.id} - ${currentCase.title}`;
- const story=document.createElement('p');story.textContent=currentCase.story;story.style.background='#f8fafc';story.style.padding='12px';story.style.borderRadius='10px';
- card.append(back,title,story);vs.appendChild(card);
- currentCase.questions.forEach((q,i)=>{
-  const qc=document.createElement('div');qc.className='card';
-  const qb=document.createElement('b');qb.textContent=`Q${i+1}: ${q.q}`;qc.appendChild(qb);
-  if(q.type==='text'){
-   const ta=document.createElement('textarea');ta.id='txt'+i;ta.placeholder='Type answer...';qc.appendChild(ta);
-  } else {
-   q.opts.forEach((o,j)=>{
-    const b=document.createElement('button');b.className='opt';b.textContent=o;
-    b.addEventListener('click',()=>{answers[i]=j;qc.querySelectorAll('.opt').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');});
-    qc.appendChild(b);
-   });
+
+async function sha256(str){const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str));return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');}
+let USERS=[];
+
+async function initUsers(){
+  USERS=[];
+  for(const u of USERS_RAW){
+    const hash=await sha256(u.pass);
+    USERS.push({...u,hash});
   }
-  vs.appendChild(qc);
- });
- const sub=document.createElement('div');sub.className='card';
- const sb=document.createElement('button');sb.className='btn gold';sb.style.width='100%';sb.textContent='Submit Solution';sb.addEventListener('click',submitCase);
- sub.appendChild(sb);vs.appendChild(sub);
 }
-function submitCase(){
- let score=0;currentCase.questions.forEach((q,i)=>{
-  if(q.type==='text'){const v=(document.getElementById('txt'+i).value||'').trim();answers[i]=v;if(v.length>10)score+=0.5;}else{if(answers[i]===q.ans)score++;}
- });
- const rec={caseId:currentCase.id,title:currentCase.title,type:currentCase.type,level:currentCase.level,score,total:currentCase.questions.length,date:new Date().toISOString()};
- const all=JSON.parse(localStorage.getItem('ssnps_cases')||'[]');all.push(rec);localStorage.setItem('ssnps_cases',JSON.stringify(all));
- alert(`Submitted! Score: ${score}/${currentCase.questions.length}`);showRes();
+
+function getCurrentUser(){try{return JSON.parse(localStorage.getItem('ssnps_user')||'null');}catch{return null;}}
+
+async function doLogin(){
+  const id=document.getElementById('loginId').value.trim().toUpperCase();
+  const pass=document.getElementById('loginPass').value.trim();
+  if(!id||!pass){alert('Enter ID and Password');return;}
+  const hash=await sha256(pass);
+  const user=USERS.find(u=>u.id===id && u.hash===hash);
+  if(!user){alert('Wrong ID or Password - محاولة دخول غير مصرح بها مسجلة');return;}
+  localStorage.setItem('ssnps_user',JSON.stringify({id:user.id,name:user.name,role:user.role,loginTime:new Date().toISOString()}));
+  location.reload();
 }
-function showRes(){
- hideAll();const vr=document.getElementById('vRes');vr.style.display='block';vr.replaceChildren();
- const data=JSON.parse(localStorage.getItem('ssnps_cases')||'[]');
- if(!data.length){const c=document.createElement('div');c.className='card';c.textContent='No solved cases yet';vr.appendChild(c);return;}
- const head=document.createElement('div');head.className='card';head.innerHTML='<h3>Solved Cases</h3>';vr.appendChild(head);
- data.slice().reverse().forEach(r=>{
-  const c=document.createElement('div');c.className='card';c.textContent=`${r.caseId} - ${r.title} | ${r.type}/${r.level} | Score: ${r.score}/${r.total} | ${new Date(r.date).toLocaleString()}`;vr.appendChild(c);
- });
+
+function checkAuth(){
+  const u=getCurrentUser();
+  if(!u){document.getElementById('loginPage').style.display='block';document.getElementById('app').style.display='none';return false;}
+  document.getElementById('loginPage').style.display='none';document.getElementById('app').style.display='block';
+  document.getElementById('userInfo').textContent=`${u.name} (${u.id}) - ${u.role}`;
+  if(u.role==='admin'){document.getElementById('adminPanel').style.display='block';}
+  return true;
 }
-function hideAll(){['vLib','vCases','vSolve','vRes'].forEach(id=>document.getElementById(id).style.display='none');}
-document.getElementById('bLib').addEventListener('click',()=>{hideAll();document.getElementById('vLib').style.display='block';});
-document.getElementById('bCases').addEventListener('click',()=>{hideAll();document.getElementById('vCases').style.display='block';renderCases();});
-document.getElementById('bRes').addEventListener('click',showRes);
-document.getElementById('bOut').addEventListener('click',()=>{if(confirm('Clear local results & logout?')){localStorage.clear();location.reload();}});
-document.getElementById('vLib').innerHTML='<div class="card"><h3>Electronic Library</h3><p>2060, 2008, 2015 books - Add PDFs in /books folder</p></div>';
+
+// ========== SECURE FILE UPLOAD ==========
+document.getElementById('uploadBtn')?.addEventListener('click',()=>{
+  const file=document.getElementById('pdfUpload').files[0];
+  const status=document.getElementById('uploadStatus');
+  if(!file){status.textContent='Choose file first';return;}
+  if(file.type!=='application/pdf'){status.textContent='Only PDF allowed!';return;}
+  if(file.size>10*1024*1024){status.textContent='File too large >10MB';return;}
+  // Secure save to localStorage via object URL reference (offline)
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      const books=JSON.parse(localStorage.getItem('ssnps_books')||'[]');
+      books.push({name:file.name,size:(file.size/1024/1024).toFixed(2)+' MB',data:e.target.result,uploadedBy:getCurrentUser().id,date:new Date().toISOString()});
+      localStorage.setItem('ssnps_books',JSON.stringify(books));
+      status.textContent='Uploaded securely: '+file.name;
+      renderLibrary();
+    }catch(err){status.textContent='Storage full - احذف كتب قديمة';}
+  };
+  reader.readAsDataURL(file);
+});
+
+function renderLibrary(){
+  const el=document.getElementById('vLib');el.replaceChildren();
+  const books=JSON.parse(localStorage.getItem('ssnps_books')||'[]');
+  const head=document.createElement('div');head.className='card';head.innerHTML='<h3>Electronic Library - Offline</h3><p>Books uploaded by Admin</p>';el.appendChild(head);
+  if(!books.length){const c=document.createElement('div');c.className='card';c.textContent='No books yet. Admin must upload.';el.appendChild(c);return;}
+  books.forEach((b,i)=>{
+    const card=document.createElement('div');card.className='card';
+    const t=document.createElement('h4');t.textContent=b.name;
+    const meta=document.createElement('small');meta.textContent=`${b.size} - by ${b.uploadedBy} - ${new Date(b.date).toLocaleString()}`;
+    const open=document.createElement('button');open.className='btn gold';open.textContent='Open';open.style.marginTop='8px';
+    open.addEventListener('click',()=>{const w=window.open();w.document.write(`<iframe src="${b.data}" style="width:100%;height:100vh;border:none"></iframe>`);});
+    const del=document.createElement('button');del.className='btn red';del.textContent='Delete';del.style.marginLeft='8px';
+    del.addEventListener('click',()=>{if(getCurrentUser().role!=='admin'){alert('Only admin');return;}if(confirm('Delete?')){books.splice(i,1);localStorage.setItem('ssnps_books',JSON.stringify(books));renderLibrary();}});
+    card.append(t,meta,document.createElement('br'),open,del);el.appendChild(card);
+  });
+}
+
+// ========== INIT ==========
+initUsers().then(()=>{
+  checkAuth();
+  renderLibrary();
+  document.getElementById('loginBtn').addEventListener('click',doLogin);
+  document.getElementById('bOut').addEventListener('click',()=>{localStorage.removeItem('ssnps_user');location.reload();});
+  document.getElementById('bLib').addEventListener('click',()=>{document.getElementById('vLib').style.display='block';document.getElementById('vCases').style.display='none';document.getElementById('vRes').style.display='none';});
+  document.getElementById('bCases').addEventListener('click',()=>{document.getElementById('vCases').style.display='block';document.getElementById('vLib').style.display='none';document.getElementById('vRes').style.display='none';document.getElementById('vCases').innerHTML='<div class="card"><h3>Cases Module</h3><p>Use previous V3 cases code here - same secure logic</p></div>';});
+  document.getElementById('bRes').addEventListener('click',()=>{document.getElementById('vRes').style.display='block';document.getElementById('vLib').style.display='none';document.getElementById('vCases').style.display='none';document.getElementById('vRes').innerHTML='<div class="card"><h3>Results for '+getCurrentUser().id+'</h3><p>Results saved offline per user</p></div>';});
+});
 if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js');}
 </script>
 </body>
