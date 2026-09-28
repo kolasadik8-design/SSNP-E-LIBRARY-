@@ -1,24 +1,16 @@
 {
-  "name": "SSNPS Police Academy",
+  "name": "South Sudan Police - SSNPS",
   "short_name": "SSNPS",
-  "description": "South Sudan National Police Service - Training Academy System",
+  "description": "SSNPS Soldier Management System",
   "start_url": "/",
-  "scope": "/",
   "display": "standalone",
-  "background_color": "#0a0e1a",
-  "theme_color": "#16213e",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/512/1695/1695632.png",
+      "src": "https://cdn-icons-png.flaticon.com/512/3064/3064197.png",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "https://cdn-icons-png.flaticon.com/512/512/1695/1695632.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
+      "type": "image/png"
     }
   ]
 }
