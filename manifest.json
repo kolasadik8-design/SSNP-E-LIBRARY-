@@ -1,16 +1,12 @@
 {
-  "name": "SSNPS POLICE APP PRO",
+  "name": "SSNPS Police Academy",
   "short_name": "SSNPS",
-  "start_url": "./index.html",
-  "scope": "./",
+  "description": "South Sudan National Police Service - Academy System",
+  "start_url": "./",
   "display": "standalone",
-  "background_color": "#16213e",
+  "background_color": "#0a0e1a",
   "theme_color": "#16213e",
+  "orientation": "portrait",
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/2091/2091665.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
-  ]
-}
+      "src": "https://cdn-icons-png.flaticon.com/
