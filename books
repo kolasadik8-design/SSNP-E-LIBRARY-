@@ -1,0 +1,29 @@
+<h3>📚 Police Library</h3>
+<input id="pdfTitle" placeholder="اسم الكتاب">
+<input id="pdfUrl" placeholder="رابط الكتاب e.g. books/criminal-law.pdf">
+<button class="btn dark" id="addBookBtn">إضافة الكتاب للمكتبة</button>
+<p id="uploadStatus"></p>
+<div id="booksList"></div>
+
+<script>
+async function addBook(){
+ const title=document.getElementById('pdfTitle').value;
+ const url=document.getElementById('pdfUrl').value;
+ if(!title||!url){alert('اكتب الاسم والرابط');return;}
+ await db.collection('library').add({title:title, url:url, created:Date.now()});
+ document.getElementById('uploadStatus').textContent='✅ تمت إضافة '+title;
+ loadBooks();
+}
+async function loadBooks(){
+ const snap=await db.collection('library').orderBy('created','desc').get();
+ let html='';
+ snap.forEach(doc=>{
+  const d=doc.data();
+  html+=`<div style="padding:10px;border-bottom:1px solid #ddd"><b>${d.title}</b><br><a href="${d.url}" target="_blank" style="color:blue">📖 قراءة / تحميل</a></div>`;
+ });
+ document.getElementById('booksList').innerHTML=html;
+}
+document.getElementById('addBookBtn').addEventListener('click',addBook);
+// شغلها أول ما تفتح المكتبة
+loadBooks();
+</script>
