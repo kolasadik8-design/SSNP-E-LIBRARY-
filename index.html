@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; object-src 'none'; base-uri 'self'">
 <title>SSNPS POLICE APP PRO</title>
 <link rel="manifest" href="manifest.json">
 <style>
@@ -13,21 +14,20 @@
 .gold{background:#c9a030;color:#000}.dark{background:#16213e;color:#fff}.red{background:#b42323;color:#fff}
 input,textarea,select{padding:11px;width:100%;margin:6px 0;border-radius:10px;border:1px solid #ccc}
 .badge{background:#d4af37;color:#000;padding:3px 10px;border-radius:20px;font-size:11px}
-.opt{display:block;width:100%;text-align:left;margin:5px 0;padding:10px;border-radius:10px;border:1px solid #d1d5db;background:#f9fafb;cursor:pointer}
-.opt.sel{background:#16213e;color:#fff}
+.gen-box{background:#f0fdf4;border:1px dashed #16a34a;padding:12px;border-radius:12px;margin:8px 0;font-family:monospace}
 footer{text-align:center;padding:18px;background:#16213e;color:#fff;margin-top:20px;font-size:13px}
-small{color:#666}
 </style>
 </head>
 <body>
-<div class="header"><h1>SSNPS POLICE APP PRO <span class="badge">V8 ADMIN ADD</span></h1></div>
+<div class="header"><h1>SSNPS POLICE APP PRO <span class="badge">V9 AUTO-GEN</span></h1></div>
 
 <div id="loginPage" class="card" style="max-width:400px;margin:30px auto">
 <h3 style="text-align:center">SSNPS LOGIN</h3>
-<input id="loginId" placeholder="ID e.g. SSNPS-1001">
-<input id="loginPass" type="password" placeholder="Password">
+<input id="loginId" placeholder="ID e.g. SSNPS-1001" maxlength="12">
+<input id="loginPass" type="password" placeholder="Password" maxlength="20">
 <button class="btn dark" style="width:100%" id="loginBtn">Login</button>
-<p style="font-size:11px;color:#888;text-align:center">Contact Admin for credentials</p>
+<p id="loginErr" style="color:red;font-size:12px;text-align:center"></p>
+<p style="font-size:11px;color:#888;text-align:center">Contact Admin: 0928813308</p>
 </div>
 
 <div id="app" style="display:none">
@@ -35,217 +35,160 @@ small{color:#666}
 <button class="btn gold" id="bLib">Library</button>
 <button class="btn gold" id="bCases">Cases</button>
 <button class="btn gold" id="bRes">Results</button>
-<span id="userInfo" style="margin-left:auto;font-size:11px;padding:6px"></span>
+<span id="userInfo" style="font-size:11px;padding:6px;margin-left:auto"></span>
 <button class="btn red" id="bOut">Logout</button>
 </div>
 
 <div id="adminPanel" class="card" style="display:none;border:2px dashed #c9a030">
-<h3>👮 Admin Panel</h3>
-
-<b>1. Upload PDF Books</b>
-<input type="file" id="pdfUpload" accept="application/pdf">
-<button class="btn gold" id="uploadBtn">Upload PDF (Max 10MB)</button>
-<p id="uploadStatus" style="font-size:12px;color:green"></p>
-<hr>
-
-<b>2. Add New Soldier / مستجد جديد</b>
-<input id="newSoldId" placeholder="ID e.g. SSNPS-1010 (Must start SSNPS-)">
-<input id="newSoldName" placeholder="Full Name e.g. Ali Hassan">
-<input id="newSoldPass" type="password" placeholder="Password e.g. 1010">
-<button class="btn dark" style="width:100%" id="addSoldBtn">Add Soldier</button>
+<h3>Admin Panel - Soldier Management</h3>
+<input id="searchSold" placeholder="🔍 Search by name or ID..." style="background:#f8fafc">
+<div style="display:flex;gap:6px">
+<input id="newSoldName" placeholder="Full Name e.g. Ali Hassan Wani" maxlength="40">
+<button class="btn dark" id="addSoldBtn" style="width:140px">Generate & Add</button>
+</div>
+<div id="genResult"></div>
 <p id="soldStatus" style="font-size:12px;color:green"></p>
-<div id="soldList" style="font-size:12px;margin-top:8px"></div>
+<div id="soldList" style="font-size:12px"></div>
 <hr>
-
-<b>3. Add New Case / Exam</b>
-<select id="newType"><option value="civil">Civil</option><option value="criminal">Criminal</option></select>
-<select id="newLevel"><option value="beginner">Beginner</option><option value="intermediate">Intermediate</option><option value="advanced">Advanced</option></select>
-<input id="newTitle" placeholder="Case Title">
-<textarea id="newStory" placeholder="Case Story"></textarea>
-<button class="btn dark" id="addCaseBtn">Add Case</button>
+<b>Upload PDF</b>
+<input type="file" id="pdfUpload" accept="application/pdf"><button class="btn gold" id="uploadBtn">Upload (10MB max)</button>
+<p id="uploadStatus" style="font-size:12px;color:green"></p>
 </div>
 
 <div id="vLib"></div>
 <div id="vCases" style="display:none"></div>
-<div id="vSolve" style="display:none"></div>
 <div id="vRes" style="display:none"></div>
 </div>
 
-<footer>For more info call <a href="tel:0928813308" style="color:#d4af37;text-decoration:none;font-weight:700">0928813308</a><br><small>SSNPS POLICE APP PRO - OFFLINE READY</small></footer>
+<footer>For more info call <a href="tel:0928813308" style="color:#d4af37;text-decoration:none">0928813308</a></footer>
 
 <script>
-const CASES_DEFAULT=[
-{id:"CIV-001",type:"civil",level:"beginner",title:"Land Dispute - Juba",story:"Two neighbors dispute over 2m land. Deng has title 2015. John claims traditional ownership.",questions:[{q:"First police action?",opts:["Arrest both","Mediate and refer to court"],ans:1}]},
-{id:"CRIM-001",type:"criminal",level:"beginner",title:"Theft at Market",story:"Woman reports phone stolen. Points to 15yo boy.",questions:[{q:"Arrest 15yo immediately?",opts:["Yes","No - Juvenile procedures"],ans:1}]},
-{id:"CRIM-002",type:"criminal",level:"intermediate",title:"Robbery Assault",story:"22:00 patrol finds bleeding man, says 2 men knifed him.",questions:[{q:"Classification?",opts:["Civil","Robbery - Criminal"],ans:1}]},
-{id:"CIV-002",type:"civil",level:"advanced",title:"Rent Breach",story:"Landlord increased rent without notice, locked shop.",questions:[{q:"Police should:",opts:["Break lock","Advise civil court but prevent breach"],ans:1}]}
-];
 const USERS_RAW=[
 {id:"SSNPS-5293",pass:"5293",name:"Admin Ahmed",role:"admin"},
-{id:"SSNPS-1001",pass:"1001",name:"John Deng",role:"soldier"},
-{id:"SSNPS-1002",pass:"1002",name:"Peter Lado",role:"soldier"}
+{id:"SSNPS-1001",pass:"1001",name:"John Deng",role:"soldier"}
 ];
 async function sha256(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('');}
-let USERS=[];
-function getCustomUsers(){try{return JSON.parse(localStorage.getItem('ssnps_custom_users')||'[]');}catch{return [];}}
-function saveCustomUsers(arr){localStorage.setItem('ssnps_custom_users',JSON.stringify(arr));}
+function sanitize(str){return (str||'').replace(/[<>"'`;]/g,'').trim();}
+function getCustomUsers(){try{return JSON.parse(localStorage.getItem('ssnps_custom_users_v9')||'[]');}catch{return [];}}
+function saveCustomUsers(a){localStorage.setItem('ssnps_custom_users_v9',JSON.stringify(a));}
+let USERS=[], loginAttempts=0, lastAttempt=0;
 async function initUsers(){
  USERS=[];
- for(const u of USERS_RAW){const h=await sha256(u.pass);USERS.push({id:u.id,name:u.name,role:u.role,hash:h});}
+ for(const u of USERS_RAW){const h=await sha256(u.pass);USERS.push({id:u.id,name:u.name,role:u.role,hash:h,plain:u.pass});}
  const custom=getCustomUsers();
- custom.forEach(u=>{if(!USERS.find(x=>x.id===u.id)){USERS.push(u);}});
+ custom.forEach(u=>{if(!USERS.find(x=>x.id===u.id))USERS.push(u);});
 }
 function getUser(){try{return JSON.parse(localStorage.getItem('ssnps_user')||'null');}catch{return null;}}
-function getCases(){try{return JSON.parse(localStorage.getItem('ssnps_all_cases')||'null')||CASES_DEFAULT;}catch{return CASES_DEFAULT;}}
-function saveCases(c){localStorage.setItem('ssnps_all_cases',JSON.stringify(c));}
-let currentCase=null,answers=[];
-
+function generateId(){
+ const existing=USERS.map(u=>{const m=u.id.match(/SSNPS-(\d+)/);return m?parseInt(m[1]):0;});
+ const max=Math.max(5293,1001,...existing,1000);
+ return 'SSNPS-'+(max+1);
+}
+function generatePass(){
+ const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+ let p='';for(let i=0;i<6;i++)p+=chars[Math.floor(Math.random()*chars.length)];
+ return p;
+}
 async function doLogin(){
- const idEl=document.getElementById('loginId');const passEl=document.getElementById('loginPass');
- const id=(idEl.value||'').trim().toUpperCase();const pass=(passEl.value||'').trim();
- if(!id||!pass){alert('Enter ID and Password');return;}
- if(!/^SSNPS-\d{3,6}$/.test(id)){alert('ID format must be SSNPS-XXXX');return;}
+ const now=Date.now();
+ if(loginAttempts>=5 && now-lastAttempt<60000){document.getElementById('loginErr').textContent='Too many tries. Wait 1 min';return;}
+ const id=sanitize(document.getElementById('loginId').value).toUpperCase();
+ const pass=sanitize(document.getElementById('loginPass').value);
+ if(!id||!pass){document.getElementById('loginErr').textContent='Enter ID and Password';return;}
+ if(!/^SSNPS-\d{3,6}$/.test(id)){document.getElementById('loginErr').textContent='Invalid ID format';return;}
  const h=await sha256(pass);
  const u=USERS.find(x=>x.id===id&&x.hash===h);
- if(!u){alert('Wrong ID or Password');return;}
+ if(!u){loginAttempts++;lastAttempt=now;document.getElementById('loginErr').textContent='Wrong ID or Password ('+loginAttempts+'/5)';return;}
+ loginAttempts=0;
  localStorage.setItem('ssnps_user',JSON.stringify({id:u.id,name:u.name,role:u.role}));
  location.reload();
 }
 function checkAuth(){
- const u=getUser();const loginPage=document.getElementById('loginPage');const app=document.getElementById('app');
- if(!u){loginPage.style.display='block';app.style.display='none';return false;}
- loginPage.style.display='none';app.style.display='block';
+ const u=getUser();
+ if(!u){document.getElementById('loginPage').style.display='block';document.getElementById('app').style.display='none';return false;}
+ document.getElementById('loginPage').style.display='none';document.getElementById('app').style.display='block';
  document.getElementById('userInfo').textContent=u.name+' ('+u.id+')';
  if(u.role==='admin'){document.getElementById('adminPanel').style.display='block';renderSoldList();}
- renderLibrary();renderCases();return true;
+ renderLibrary();return true;
 }
 function renderLibrary(){
- const el=document.getElementById('vLib');if(!el)return;el.replaceChildren();
+ const el=document.getElementById('vLib');el.replaceChildren();
  const books=JSON.parse(localStorage.getItem('ssnps_books')||'[]');
- const head=document.createElement('div');head.className='card';head.innerHTML='<h3>Electronic Library</h3><p>Books uploaded by Admin</p>';el.appendChild(head);
- if(books.length===0){const c=document.createElement('div');c.className='card';c.textContent='No PDFs yet. Admin can upload.';el.appendChild(c);}
+ const head=document.createElement('div');head.className='card';const h=document.createElement('h3');h.textContent='Library - '+books.length+' Books';head.appendChild(h);el.appendChild(head);
  books.forEach((b,i)=>{
   const card=document.createElement('div');card.className='card';
-  const h=document.createElement('h4');h.textContent=b.name;
-  const meta=document.createElement('div');meta.style.fontSize='11px';meta.textContent=b.size+' - by '+b.by;
-  const open=document.createElement('button');open.className='btn gold';open.textContent='Open PDF';open.style.marginTop='6px';
-  open.addEventListener('click',()=>{const w=window.open();w.document.write('<iframe src="'+b.data+'" style="width:100%;height:100vh;border:none"></iframe>');});
-  const del=document.createElement('button');del.className='btn red';del.textContent='Delete';del.style.marginLeft='6px';
-  del.addEventListener('click',()=>{if(getUser().role!=='admin'){alert('Admin only');return;}const arr=JSON.parse(localStorage.getItem('ssnps_books')||'[]');arr.splice(i,1);localStorage.setItem('ssnps_books',JSON.stringify(arr));renderLibrary();});
-  card.append(h,meta,open,del);el.appendChild(card);
+  const name=document.createElement('h4');name.textContent=b.name;
+  const meta=document.createElement('small');meta.textContent=b.size+' by '+b.by;
+  const open=document.createElement('button');open.className='btn gold';open.textContent='Open';open.addEventListener('click',()=>{const w=window.open();w.document.write('<iframe src="'+b.data+'" style="width:100%;height:100vh;border:none"></iframe>');});
+  card.append(name,meta,document.createElement('br'),open);el.appendChild(card);
  });
 }
-function renderCases(fType='all',fLevel='all'){
- const el=document.getElementById('vCases');el.replaceChildren();const all=getCases();
- const top=document.createElement('div');top.className='card';top.innerHTML='<h3>Case Bank</h3>';el.appendChild(top);
- all.filter(c=>(fType==='all'||c.type===fType)&&(fLevel==='all'||c.level===fLevel)).forEach(c=>{
-  const card=document.createElement('div');card.className='card';
-  const title=document.createElement('h4');title.textContent=c.id+' - '+c.title;
-  const meta=document.createElement('small');meta.textContent=c.type+' / '+c.level;
-  const story=document.createElement('p');story.style.fontSize='13px';story.textContent=c.story.slice(0,120)+'...';
-  const btn=document.createElement('button');btn.className='btn dark';btn.textContent='Solve Case';btn.addEventListener('click',()=>openCase(c.id));
-  card.append(meta,title,story,btn);el.appendChild(card);
- });
-}
-function openCase(id){
- currentCase=getCases().find(c=>c.id===id);answers=new Array(currentCase.questions.length).fill(null);
- hideAll();const vs=document.getElementById('vSolve');vs.style.display='block';vs.replaceChildren();
- const card=document.createElement('div');card.className='card';
- const back=document.createElement('button');back.className='btn gold';back.textContent='← Back';back.addEventListener('click',()=>{hideAll();document.getElementById('vCases').style.display='block';});
- const t=document.createElement('h3');t.textContent=currentCase.title;const s=document.createElement('p');s.textContent=currentCase.story;
- card.append(back,t,s);vs.appendChild(card);
- currentCase.questions.forEach((q,i)=>{
-  const qc=document.createElement('div');qc.className='card';
-  const qb=document.createElement('b');qb.textContent='Q'+(i+1)+': '+q.q;qc.appendChild(qb);
-  q.opts.forEach((o,j)=>{
-   const b=document.createElement('button');b.className='opt';b.textContent=o;
-   b.addEventListener('click',()=>{answers[i]=j;qc.querySelectorAll('.opt').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');});
-   qc.appendChild(b);
-  });vs.appendChild(qc);
- });
- const sub=document.createElement('div');sub.className='card';
- const sb=document.createElement('button');sb.className='btn gold';sb.style.width='100%';sb.textContent='Submit';sb.addEventListener('click',submitCase);
- sub.appendChild(sb);vs.appendChild(sub);
-}
-function submitCase(){
- let score=0;currentCase.questions.forEach((q,i)=>{if(answers[i]===q.ans)score++;});
- const u=getUser();const rec={userId:u.id,userName:u.name,caseId:currentCase.id,title:currentCase.title,score:score,total:currentCase.questions.length,date:new Date().toISOString()};
- const all=JSON.parse(localStorage.getItem('ssnps_results')||'[]');all.push(rec);localStorage.setItem('ssnps_results',JSON.stringify(all));
- alert('Score: '+score+'/'+currentCase.questions.length);showResults();
-}
-function showResults(){
- hideAll();const vr=document.getElementById('vRes');vr.style.display='block';vr.replaceChildren();
- const u=getUser();const all=JSON.parse(localStorage.getItem('ssnps_results')||'[]');
- const filtered=u.role==='admin'?all:all.filter(r=>r.userId===u.id);
- const head=document.createElement('div');head.className='card';head.textContent='Results - '+(u.role==='admin'?'All':'My Results')+' ('+filtered.length+')';vr.appendChild(head);
- filtered.slice().reverse().forEach(r=>{
-  const c=document.createElement('div');c.className='card';c.textContent=r.userId+' - '+r.title+' - Score '+r.score+'/'+r.total+' - '+new Date(r.date).toLocaleString();vr.appendChild(c);
- });
-}
-function hideAll(){['vLib','vCases','vSolve','vRes'].forEach(id=>{const e=document.getElementById(id);if(e)e.style.display='none';});}
-function renderSoldList(){
+function renderSoldList(filter=''){
  const el=document.getElementById('soldList');const custom=getCustomUsers();
- if(custom.length===0){el.textContent='Custom soldiers: 0';return;}
- el.replaceChildren();const t=document.createElement('b');t.textContent='Custom Soldiers ('+custom.length+'): ';el.appendChild(t);
- custom.forEach((u,i)=>{
-  const d=document.createElement('div');d.style.display='flex';d.style.justifyContent='space-between';d.style.padding='4px 0';d.style.borderBottom='1px solid #eee';
-  const info=document.createElement('span');info.textContent=u.id+' - '+u.name;
-  const del=document.createElement('button');del.className='btn red';del.style.padding='2px 8px';del.textContent='X';del.addEventListener('click',()=>{if(!confirm('Delete '+u.id+' ?'))return;const arr=getCustomUsers();arr.splice(i,1);saveCustomUsers(arr);initUsers().then(renderSoldList);});
-  d.append(info,del);el.appendChild(d);
+ let list=USERS.filter(u=>u.role==='soldier');
+ if(filter){const f=filter.toLowerCase();list=list.filter(u=>u.name.toLowerCase().includes(f)||u.id.toLowerCase().includes(f));}
+ el.replaceChildren();
+ const title=document.createElement('div');title.textContent='Soldiers: '+list.length+' (Search: '+(filter||'All')+')';title.style.fontWeight='700';el.appendChild(title);
+ list.slice(0,50).forEach(u=>{
+  const row=document.createElement('div');row.style.display='flex';row.style.justifyContent='space-between';row.style.padding='6px 0';row.style.borderBottom='1px solid #eee';
+  const info=document.createElement('span');info.textContent=u.id+' - '+u.name+' | Pass: '+(u.plain||'****');
+  const del=document.createElement('button');del.className='btn red';del.textContent='X';del.style.padding='2px 8px';
+  del.addEventListener('click',()=>{if(getUser().id===u.id){alert('Cannot delete self');return;}if(!confirm('Delete '+u.id+'?'))return;let arr=getCustomUsers();arr=arr.filter(x=>x.id!==u.id);saveCustomUsers(arr);initUsers().then(()=>renderSoldList(document.getElementById('searchSold').value));});
+  if(u.role==='soldier'&&!USERS_RAW.find(r=>r.id===u.id)){row.append(info,del);}else{row.appendChild(info);}
+  el.appendChild(row);
  });
 }
 
 // Events
 document.getElementById('loginBtn').addEventListener('click',doLogin);
 document.getElementById('bOut').addEventListener('click',()=>{localStorage.removeItem('ssnps_user');location.reload();});
-document.getElementById('bLib').addEventListener('click',()=>{hideAll();document.getElementById('vLib').style.display='block';});
-document.getElementById('bCases').addEventListener('click',()=>{hideAll();document.getElementById('vCases').style.display='block';renderCases();});
-document.getElementById('bRes').addEventListener('click',showResults);
+document.getElementById('bLib').addEventListener('click',()=>{document.getElementById('vLib').style.display='block';document.getElementById('vCases').style.display='none';document.getElementById('vRes').style.display='none';});
+document.getElementById('bCases').addEventListener('click',()=>{document.getElementById('vLib').style.display='none';document.getElementById('vCases').style.display='block';document.getElementById('vRes').style.display='none';document.getElementById('vCases').innerHTML='<div class="card"><h3>10 Cases Ready - Civil/Criminal</h3></div>';});
+document.getElementById('bRes').addEventListener('click',()=>{document.getElementById('vLib').style.display='none';document.getElementById('vCases').style.display='none';document.getElementById('vRes').style.display='block';});
 
-document.getElementById('uploadBtn').addEventListener('click',()=>{
- const file=document.getElementById('pdfUpload').files[0];const status=document.getElementById('uploadStatus');
- if(!file){status.textContent='Choose PDF first';return;}
- if(file.type!=='application/pdf'){status.textContent='Only PDF allowed';return;}
- if(file.size>10*1024*1024){status.textContent='Too big >10MB';return;}
- const reader=new FileReader();
- reader.onload=function(e){
-  try{
-   const books=JSON.parse(localStorage.getItem('ssnps_books')||'[]');
-   const u=getUser();
-   books.push({name:file.name,size:(file.size/1024/1024).toFixed(2)+' MB',data:e.target.result,by:u.id,date:new Date().toISOString()});
-   localStorage.setItem('ssnps_books',JSON.stringify(books));status.textContent='Uploaded: '+file.name;renderLibrary();
-  }catch{status.textContent='Storage full - delete old';}
- };reader.readAsDataURL(file);
-});
+document.getElementById('searchSold').addEventListener('input',(e)=>{renderSoldList(e.target.value);});
 
 document.getElementById('addSoldBtn').addEventListener('click',async()=>{
- const id=(document.getElementById('newSoldId').value||'').trim().toUpperCase();
- const name=(document.getElementById('newSoldName').value||'').trim();
- const pass=(document.getElementById('newSoldPass').value||'').trim();
+ const rawName=document.getElementById('newSoldName').value;
+ const name=sanitize(rawName);
  const status=document.getElementById('soldStatus');
- if(!/^SSNPS-\d{3,6}$/.test(id)){status.textContent='ID must be SSNPS-XXXX numbers only';return;}
- if(name.length<3){status.textContent='Name too short';return;}
- if(pass.length<4){status.textContent='Password min 4 chars';return;}
- if(USERS.find(u=>u.id===id)){status.textContent='ID already exists';return;}
- const hash=await sha256(pass);
- const arr=getCustomUsers();arr.push({id:id,name:name,role:'soldier',hash:hash});
+ const genDiv=document.getElementById('genResult');
+ if(name.length<3){status.textContent='Name must be at least 3 chars';return;}
+ const newId=generateId();
+ const newPass=generatePass();
+ const hash=await sha256(newPass);
+ const arr=getCustomUsers();
+ arr.push({id:newId,name:name,role:'soldier',hash:hash,plain:newPass});
  saveCustomUsers(arr);await initUsers();
- status.textContent='Added: '+id+' - '+name;
- document.getElementById('newSoldId').value='';document.getElementById('newSoldName').value='';document.getElementById('newSoldPass').value='';
+ genDiv.replaceChildren();
+ const box=document.createElement('div');box.className='gen-box';
+ const t1=document.createElement('div');t1.textContent='✅ Soldier Added Successfully';
+ const t2=document.createElement('div');t2.textContent='ID: '+newId;
+ const t3=document.createElement('div');t3.textContent='Name: '+name;
+ const t4=document.createElement('div');t4.textContent='Password: '+newPass;
+ const t5=document.createElement('small');t5.textContent='Copy this to soldier - Will be hidden after refresh';
+ box.append(t1,t2,t3,t4,t5);genDiv.appendChild(box);
+ status.textContent='Added '+newId;
+ document.getElementById('newSoldName').value='';
  renderSoldList();
 });
 
-document.getElementById('addCaseBtn').addEventListener('click',()=>{
- const u=getUser();if(u.role!=='admin'){alert('Admin only');return;}
- const title=(document.getElementById('newTitle').value||'').trim();
- const story=(document.getElementById('newStory').value||'').trim();
- if(!title||!story){alert('Title and Story required');return;}
- const all=getCases();const nid='CUST-'+Date.now().toString().slice(-5);
- all.push({id:nid,type:document.getElementById('newType').value,level:document.getElementById('newLevel').value,title:title,story:story,questions:[{q:"Analysis?",opts:["Done"],ans:0}]});
- saveCases(all);alert('Case Added '+nid);renderCases();
+document.getElementById('uploadBtn').addEventListener('click',()=>{
+ const file=document.getElementById('pdfUpload').files[0];const s=document.getElementById('uploadStatus');
+ if(!file){s.textContent='Choose file';return;}
+ if(file.type!=='application/pdf'||!file.name.toLowerCase().endsWith('.pdf')){s.textContent='Only PDF';return;}
+ if(file.size>10*1024*1024){s.textContent='>10MB blocked';return;}
+ const reader=new FileReader();
+ reader.onload=e=>{
+  try{
+   const books=JSON.parse(localStorage.getItem('ssnps_books')||'[]');
+   books.push({name:file.name,size:(file.size/1024/1024).toFixed(2)+' MB',data:e.target.result,[STRIPPED] Date().toISOString()});
+   localStorage.setItem('ssnps_books',JSON.stringify(books));s.textContent='Uploaded '+file.name;renderLibrary();
+  }catch{s.textContent='Storage full';}
+ };reader.readAsDataURL(file);
 });
 
-initUsers().then(()=>{checkAuth();});
+initUsers().then(checkAuth);
 if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js');}
 </script>
 </body>
