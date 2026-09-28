@@ -3,172 +3,113 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:;">
 <title>SSNPS POLICE APP PRO</title>
+<link rel="manifest" href="manifest.json">
 <style>
-*{box-sizing:border-box;font-family:Inter,system-ui} body{margin:0;background:#eef2f7}
+*{box-sizing:border-box;font-family:Inter,system-ui}body{margin:0;background:#eef2f7}
 .header{background:#16213e;color:#fff;text-align:center;padding:16px;position:sticky;top:0;z-index:5}
 .badge{background:#d4af37;color:#000;padding:3px 10px;border-radius:20px;font-size:11px;margin-left:6px}
 .tabs{display:flex;gap:8px;padding:10px;margin:10px;background:#fff;border-radius:16px;overflow:auto}
-.btn{border:none;padding:9px 16px;border-radius:12px;font-weight:700;cursor:pointer;white-space:nowrap}
+.btn{border:none;padding:9px 16px;border-radius:12px;font-weight:700;cursor:pointer}
 .gold{background:#c9a030;color:#000}.red{background:#b42323;color:#fff}.dark{background:#16213e;color:#fff}
 .card{background:#fff;border-radius:18px;padding:16px;margin:10px;box-shadow:0 2px 8px #0001}
 .case-tag{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700}
 .civil{background:#dbeafe;color:#1e40af}.criminal{background:#fee2e2;color:#991b1b}
-.level{margin-left:6px}.beginner{background:#dcfce7;color:#166534}.inter{background:#fef9c3;color:#854d0e}.advanced{background:#f3e8ff;color:#6b21a8}
-.qbox{border:1px solid #e5e7eb;border-radius:12px;padding:12px;margin:12px 0}
+.beginner{background:#dcfce7;color:#166534}.inter{background:#fef9c3;color:#854d0e}.advanced{background:#f3e8ff;color:#6b21a8}
 .opt{display:block;width:100%;text-align:left;margin:6px 0;padding:10px;border-radius:10px;border:1px solid #d1d5db;background:#f9fafb;cursor:pointer}
 .opt.sel{background:#16213e;color:#fff}
 textarea{width:100%;padding:10px;border-radius:10px;border:1px solid #ccc;min-height:80px}
 </style>
 </head>
 <body>
-<div class="header"><h1>SSNPS POLICE APP PRO <span class="badge">OFFLINE READY</span></h1><small>SSNPS-5293 • Case Solving Module</small></div>
-
+<div class="header"><h1>SSNPS POLICE APP PRO <span class="badge">OFFLINE READY</span></h1><small>SSNPS-5293</small></div>
 <div class="tabs">
-  <button class="btn gold" id="bLib">Library</button>
-  <button class="btn gold" id="bCases">Cases</button>
-  <button class="btn gold" id="bRes">Results</button>
-  <button class="btn red" id="bOut">Logout</button>
+<button class="btn gold" id="bLib">Library</button>
+<button class="btn gold" id="bCases">Cases</button>
+<button class="btn gold" id="bRes">Results</button>
+<button class="btn red" id="bOut">Logout</button>
 </div>
-
-<div id="vLib"></div>
-<div id="vCases" style="display:none"></div>
-<div id="vSolve" style="display:none"></div>
-<div id="vRes" style="display:none"></div>
+<div id="vLib"></div><div id="vCases" style="display:none"></div><div id="vSolve" style="display:none"></div><div id="vRes" style="display:none"></div>
 
 <script>
-// ========== SECURE CASE BANK ==========
-const CASES = [
- {
-  id:"CIV-001", type:"civil", level:"beginner", title:"Land Dispute - Juba",
-  story:"Two neighbors in Juba, Mr. Deng and Mr. John, dispute over 2 meters of land boundary. Deng has title deed from 2015. John claims traditional ownership. No violence yet.",
-  questions:[
-   {q:"What is the first police action? Circle correct.", opts:["Arrest both","Mediate and refer to land authority / court","Ignore case","Take the land"], ans:1},
-   {q:"Is this a criminal case? Yes/No", opts:["Yes","No"], ans:1, explain:"It's civil - no crime, just dispute."},
-   {q:"Write police report summary (2 lines)", type:"text"}
-  ]
- },
- {
-  id:"CRIM-001", type:"criminal", level:"beginner", title:"Theft at Market - Konyo Konyo",
-  story:"A woman reports her phone stolen at Konyo Konyo market. She points to a boy age 15 holding similar phone. Boy says he bought it.",
-  questions:[
-   {q:"Can you arrest the 15-year-old immediately without investigation?", opts:["Yes","No - Juvenile procedures apply"], ans:1},
-   {q:"What evidence is needed?", opts:["Receipt / Witness / CCTV","Only victim statement","Beat to confess","Nothing"], ans:0},
-   {q:"Under SSNPS Act, what is the correct detention for juvenile?", opts:["Adult cell","Separate juvenile facility and inform guardian","Release without record"], ans:1}
-  ]
- },
- {
-  id:"CRIM-002", type:"criminal", level:"intermediate", title:"Assault - Night Patrol",
-  story:"At 22:00, patrol finds a man bleeding. He says two men attacked him with knife and took 50,000 SSP. No witnesses. Victim is drunk.",
-  questions:[
-   {q:"What is the classification?", opts:["Civil case","Robbery with aggravated assault - Criminal","Administrative"], ans:1},
-   {q:"First steps?", opts:["Take victim to hospital + secure scene + collect description","Leave him","Ask money to open case"], ans:0},
-   {q:"Is victim's drunkenness reason to refuse case? Yes/No", opts:["Yes","No"], ans:1}
-  ]
- },
- {
-  id:"CIV-002", type:"civil", level:"advanced", title:"Breach of Contract - Rent",
-  story:"Landlord increased rent from 300$ to 500$ without notice, locked tenant's shop. Tenant has 1 year contract. Tenant asks police to open shop.",
-  questions:[
-   {q:"Police should:", opts:["Break lock immediately","Advise tenant to go to civil court, but prevent breach of peace","Arrest landlord for theft"], ans:1},
-   {q:"This is criminal trespass? True/False", opts:["True","False - It's breach of contract, civil"], ans:1},
-   {q:"What legal article applies for civil dispute handling?", opts:["Code of Civil Procedure Act 2007","Penal Code only","Traffic Act"], ans:0}
-  ]
- },
- {
-  id:"CRIM-003", type:"criminal", level:"advanced", title:"Homicide Investigation",
-  story:"Body found near river. No ID. Knife nearby. Footprints present. Community gathered and wants to bury body immediately for cultural reasons.",
-  questions:[
-   {q:"Police must allow immediate burial? Yes/No", opts:["Yes","No - Preserve scene for CID"], ans:1},
-   {q:"Correct procedure - Circle all correct (multi-select logic in review)", opts:["Secure scene, call CID, photographer, medical examiner","Allow crowd to touch body","Document footprints and weapon"], ans:0},
-   {q:"Write 3 immediate actions as investigating officer", type:"text"}
-  ]
- }
+const CASES=[
+{id:"CIV-001",type:"civil",level:"beginner",title:"Land Dispute - Juba",story:"Two neighbors dispute over 2m land. Deng has title 2015. John claims traditional ownership. No violence.",questions:[{q:"First police action?",opts:["Arrest both","Mediate and refer to land authority / court","Ignore","Take land"],ans:1},{q:"Is this criminal? Yes/No",opts:["Yes","No"],ans:1},{q:"Write report summary (2 lines)",type:"text"}]},
+{id:"CRIM-001",type:"criminal",level:"beginner",title:"Theft at Konyo Konyo Market",story:"Woman reports phone stolen. Points to 15yo boy holding similar phone. Boy says bought it.",questions:[{q:"Arrest 15yo immediately?",opts:["Yes","No - Juvenile procedures apply"],ans:1},{q:"Evidence needed?",opts:["Receipt / Witness / CCTV","Only victim statement","Beat to confess"],ans:0}]},
+{id:"CRIM-002",type:"criminal",level:"intermediate",title:"Robbery Assault - Night Patrol",story:"22:00 patrol finds bleeding man. Says 2 men knifed him and took 50k SSP. No witnesses. Victim drunk.",questions:[{q:"Classification?",opts:["Civil","Robbery with aggravated assault - Criminal","Administrative"],ans:1},{q:"First steps?",opts:["Hospital + secure scene + description","Leave him","Ask money"],ans:0},{q:"Drunk reason to refuse case?",opts:["Yes","No"],ans:1}]},
+{id:"CIV-002",type:"civil",level:"advanced",title:"Rent Contract Breach",story:"Landlord increased rent 300$ to 500$ without notice, locked shop. Tenant has 1 year contract.",questions:[{q:"Police should:",opts:["Break lock","Advise civil court but prevent breach of peace","Arrest landlord"],ans:1},{q:"Criminal trespass?",opts:["True","False - civil breach"],ans:1}]},
+{id:"CRIM-003",type:"criminal",level:"advanced",title:"Homicide Investigation",story:"Body near river. Knife nearby. Footprints. Community wants immediate burial.",questions:[{q:"Allow immediate burial?",opts:["Yes","No - Preserve scene for CID"],ans:1},{q:"Correct procedure",opts:["Secure scene, call CID, photographer","Allow crowd touch body","Document footprints and weapon"],ans:0},{q:"Write 3 immediate actions",type:"text"}]}
 ];
-
-let currentCase=null, answers=[];
-
-function renderLib(){
- const el=document.getElementById('vLib'); el.innerHTML='';
- el.innerHTML='<div class="card"><h3>Library Books</h3><p>2060, 2008 books offline</p></div>';
-}
-function renderCases(filterType='all', filterLevel='all'){
- const el=document.getElementById('vCases'); el.innerHTML='';
- let html=`<div class="card"><h3>Case Bank - Civil & Criminal</h3>
- <div style="display:flex;gap:8px;flex-wrap:wrap">
- <button class="btn dark" onclick="renderCases('all')">All</button>
- <button class="btn gold" onclick="renderCases('civil')">Civil</button>
- <button class="btn gold" onclick="renderCases('criminal')">Criminal</button>
- </div>
- <div style="margin-top:10px;display:flex;gap:8px">
- <button class="btn" onclick="renderCases('${filterType}','beginner')">Beginner</button>
- <button class="btn" onclick="renderCases('${filterType}','intermediate')">Intermediate</button>
- <button class="btn" onclick="renderCases('${filterType}','advanced')">Advanced</button>
- </div></div>`;
- CASES.filter(c=> (filterType==='all'||c.type===filterType) && (filterLevel==='all'||c.level===filterLevel) ).forEach(c=>{
-  html+=`<div class="card">
-   <div><span class="case-tag ${c.type}">${c.type.toUpperCase()}</span><span class="case-tag level ${c.level}">${c.level}</span> <small>${c.id}</small></div>
-   <h4>${c.title}</h4><p style="font-size:14px;color:#444">${c.story.slice(0,120)}...</p>
-   <button class="btn dark" onclick="openCase('${c.id}')">Solve Case</button>
-  </div>`;
+let currentCase=null,answers=[];
+function renderCases(ft='all',fl='all'){
+ const el=document.getElementById('vCases');
+ el.replaceChildren();
+ const top=document.createElement('div');top.className='card';
+ top.innerHTML='<h3>Case Bank - Civil & Criminal (English Only)</h3>';
+ const row1=document.createElement('div');row1.style.display='flex';row1.style.gap='8px';
+ [['All','all'],['Civil','civil'],['Criminal','criminal']].forEach(([label,val])=>{const b=document.createElement('button');b.className=val==='all'?'btn dark':'btn gold';b.textContent=label;b.addEventListener('click',()=>renderCases(val,fl));row1.appendChild(b);});
+ const row2=document.createElement('div');row2.style.display='flex';row2.style.gap='8px';row2.style.marginTop='8px';
+ [['Beginner','beginner'],['Intermediate','intermediate'],['Advanced','advanced']].forEach(([l,v])=>{const b=document.createElement('button');b.className='btn gold';b.textContent=l;b.addEventListener('click',()=>renderCases(ft,v));row2.appendChild(b);});
+ top.append(row1,row2);el.appendChild(top);
+ CASES.filter(c=>(ft==='all'||c.type===ft)&&(fl==='all'||c.level===fl)).forEach(c=>{
+  const card=document.createElement('div');card.className='card';
+  const h=document.createElement('h4');h.textContent=c.title;
+  const meta=document.createElement('div');meta.innerHTML=`<span class="case-tag ${c.type}">${c.type.toUpperCase()}</span> <span class="case-tag ${c.level}">${c.level.toUpperCase()}</span> <small>${c.id}</small>`;
+  const p=document.createElement('p');p.textContent=c.story.slice(0,120)+'...';p.style.fontSize='14px';
+  const btn=document.createElement('button');btn.className='btn dark';btn.textContent='Solve Case';btn.addEventListener('click',()=>openCase(c.id));
+  card.append(meta,h,p,btn);el.appendChild(card);
  });
- el.innerHTML=html;
 }
-
 function openCase(id){
- currentCase=CASES.find(c=>c.id===id); answers=new Array(currentCase.questions.length).fill(null);
- document.getElementById('vCases').style.display='none';
- document.getElementById('vLib').style.display='none';
- const vs=document.getElementById('vSolve'); vs.style.display='block';
- let h=`<div class="card"><button class="btn gold" onclick="backToCases()">← Back</button>
- <h3>${currentCase.id} - ${currentCase.title}</h3>
- <span class="case-tag ${currentCase.type}">${currentCase.type}</span><span class="case-tag level ${currentCase.level}">${currentCase.level}</span>
- <p style="background:#f8fafc;padding:12px;border-radius:10px;margin-top:12px;line-height:1.6"><b>Case Story:</b><br>${currentCase.story}</p></div>`;
+ currentCase=CASES.find(c=>c.id===id);answers=new Array(currentCase.questions.length).fill(null);
+ hideAll();const vs=document.getElementById('vSolve');vs.style.display='block';vs.replaceChildren();
+ const card=document.createElement('div');card.className='card';
+ const back=document.createElement('button');back.className='btn gold';back.textContent='← Back';back.addEventListener('click',()=>{hideAll();document.getElementById('vCases').style.display='block';});
+ const title=document.createElement('h3');title.textContent=`${currentCase.id} - ${currentCase.title}`;
+ const story=document.createElement('p');story.textContent=currentCase.story;story.style.background='#f8fafc';story.style.padding='12px';story.style.borderRadius='10px';
+ card.append(back,title,story);vs.appendChild(card);
  currentCase.questions.forEach((q,i)=>{
-  h+=`<div class="card"><div class="qbox"><b>Q${i+1}: ${q.q}</b><div id="q${i}">`;
-  if(q.type==='text'){ h+=`<textarea id="txt${i}" placeholder="Type your answer here..."></textarea>`; }
-  else { q.opts.forEach((o,j)=>{ h+=`<button class="opt" onclick="setAns(${i},${j},this)">${o}</button>`; }); }
-  if(q.explain) h+=`<small style="color:#666">Hint: ${q.explain}</small>`;
-  h+=`</div></div></div>`;
- });
- h+=`<div class="card"><button class="btn gold" style="width:100%" onclick="submitCase()">Submit Solution</button></div>`;
- vs.innerHTML=h;
-}
-function setAns(qi,oi,el){ answers[qi]=oi; el.parentElement.querySelectorAll('.opt').forEach(b=>b.classList.remove('sel')); el.classList.add('sel'); }
-function backToCases(){ document.getElementById('vSolve').style.display='none'; document.getElementById('vCases').style.display='block'; }
-
-function submitCase(){
- let score=0; currentCase.questions.forEach((q,i)=>{
+  const qc=document.createElement('div');qc.className='card';
+  const qb=document.createElement('b');qb.textContent=`Q${i+1}: ${q.q}`;qc.appendChild(qb);
   if(q.type==='text'){
-   const txt=document.getElementById('txt'+i).value.trim();
-   answers[i]=txt; if(txt.length>10) score+=0.5; // manual review points
-  } else { if(answers[i]===q.ans) score++; }
+   const ta=document.createElement('textarea');ta.id='txt'+i;ta.placeholder='Type answer...';qc.appendChild(ta);
+  } else {
+   q.opts.forEach((o,j)=>{
+    const b=document.createElement('button');b.className='opt';b.textContent=o;
+    b.addEventListener('click',()=>{answers[i]=j;qc.querySelectorAll('.opt').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');});
+    qc.appendChild(b);
+   });
+  }
+  vs.appendChild(qc);
  });
- const record={caseId:currentCase.id, title:currentCase.title, type:currentCase.type, level:currentCase.level, score, total:currentCase.questions.length, date:new Date().toISOString(), answers};
- const all=JSON.parse(localStorage.getItem('ssnps_cases')||'[]'); all.push(record); localStorage.setItem('ssnps_cases',JSON.stringify(all));
- alert(`Submitted! Score: ${score}/${currentCase.questions.length}\nReview in Results tab`);
- showRes();
+ const sub=document.createElement('div');sub.className='card';
+ const sb=document.createElement('button');sb.className='btn gold';sb.style.width='100%';sb.textContent='Submit Solution';sb.addEventListener('click',submitCase);
+ sub.appendChild(sb);vs.appendChild(sub);
 }
-
+function submitCase(){
+ let score=0;currentCase.questions.forEach((q,i)=>{
+  if(q.type==='text'){const v=(document.getElementById('txt'+i).value||'').trim();answers[i]=v;if(v.length>10)score+=0.5;}else{if(answers[i]===q.ans)score++;}
+ });
+ const rec={caseId:currentCase.id,title:currentCase.title,type:currentCase.type,level:currentCase.level,score,total:currentCase.questions.length,date:new Date().toISOString()};
+ const all=JSON.parse(localStorage.getItem('ssnps_cases')||'[]');all.push(rec);localStorage.setItem('ssnps_cases',JSON.stringify(all));
+ alert(`Submitted! Score: ${score}/${currentCase.questions.length}`);showRes();
+}
 function showRes(){
- document.getElementById('vLib').style.display='none'; document.getElementById('vCases').style.display='none'; document.getElementById('vSolve').style.display='none';
- const vr=document.getElementById('vRes'); vr.style.display='block';
+ hideAll();const vr=document.getElementById('vRes');vr.style.display='block';vr.replaceChildren();
  const data=JSON.parse(localStorage.getItem('ssnps_cases')||'[]');
- if(!data.length){ vr.innerHTML='<div class="card"><h3>No solved cases yet</h3></div>'; return; }
- let html='<div class="card"><h3>Solved Cases - Performance</h3></div>';
+ if(!data.length){const c=document.createElement('div');c.className='card';c.textContent='No solved cases yet';vr.appendChild(c);return;}
+ const head=document.createElement('div');head.className='card';head.innerHTML='<h3>Solved Cases</h3>';vr.appendChild(head);
  data.slice().reverse().forEach(r=>{
-  html+=`<div class="card"><b>${r.caseId}</b> - ${r.title}<br><span class="case-tag ${r.type}">${r.type}</span> <span class="case-tag level ${r.level}">${r.level}</span><br>Score: <b>${r.score}/${r.total}</b> - ${new Date(r.date).toLocaleString()}</div>`;
+  const c=document.createElement('div');c.className='card';c.textContent=`${r.caseId} - ${r.title} | ${r.type}/${r.level} | Score: ${r.score}/${r.total} | ${new Date(r.date).toLocaleString()}`;vr.appendChild(c);
  });
- vr.innerHTML=html;
 }
-
-// Navigation
+function hideAll(){['vLib','vCases','vSolve','vRes'].forEach(id=>document.getElementById(id).style.display='none');}
 document.getElementById('bLib').addEventListener('click',()=>{hideAll();document.getElementById('vLib').style.display='block';});
 document.getElementById('bCases').addEventListener('click',()=>{hideAll();document.getElementById('vCases').style.display='block';renderCases();});
-document.getElementById('bRes').addEventListener('click',()=>{hideAll();showRes();});
-document.getElementById('bOut').addEventListener('click',()=>{if(confirm('Logout? Clear local results?')){localStorage.clear(); location.reload();}});
-function hideAll(){['vLib','vCases','vSolve','vRes'].forEach(id=>document.getElementById(id).style.display='none');}
-renderLib();
+document.getElementById('bRes').addEventListener('click',showRes);
+document.getElementById('bOut').addEventListener('click',()=>{if(confirm('Clear local results & logout?')){localStorage.clear();location.reload();}});
+document.getElementById('vLib').innerHTML='<div class="card"><h3>Electronic Library</h3><p>2060, 2008, 2015 books - Add PDFs in /books folder</p></div>';
+if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js');}
 </script>
 </body>
 </html>
