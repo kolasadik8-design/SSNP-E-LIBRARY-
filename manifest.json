@@ -1,7 +1,7 @@
 {
-  "name": "South Sudan Police - SSNPS",
+  "name": "SSNPS - South Sudan National Police",
   "short_name": "SSNPS",
-  "description": "SSNPS Soldier Management System",
+  "description": "Secure Soldier Management System - SSNPS",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0f172a",
@@ -10,7 +10,8 @@
     {
       "src": "https://cdn-icons-png.flaticon.com/512/3064/3064197.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
