@@ -1,10 +1,17 @@
-const CACHE = "ssnps-v1";
-self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c=>c.addAll(["/","/index.html","/manifest.json"])));
-  self.skipWaiting();
-});
-self.addEventListener('fetch', e => {
-  e.respondWith(
-    caches.match(e.request).then(r=> r || fetch(e.request)).catch(()=> caches.match("/index.html"))
-  );
-});
+{
+  "name": "SSNPS - South Sudan National Police",
+  "short_name": "SSNPS",
+  "description": "Secure Soldier Management System - SSNPS",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3064/3064197.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
