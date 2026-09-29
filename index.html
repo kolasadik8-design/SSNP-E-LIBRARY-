@@ -55,14 +55,15 @@ input{width:100%;padding:12px;margin:6px 0;border-radius:10px;background:#0a0e1a
 </div>
 
 <script>
-const firebaseConfig={apiKey:"AIzaSy...",authDomain:"ssnps-police-app-7018f.firebaseapp.com",projectId:"ssnps-police-app-7018f",appId:"1:xxx:web:xxx"};
-try{firebase.initializeApp(firebaseConfig)}catch(e){}
-const db=firebase.firestore();
-let currentUser=null,allSoldiers=[],allBooks=[];
-function escapeHtml(t){const d=document.createElement('div');d.textContent=t;return d.innerHTML}
-function sanitize(t){return t.replace(/[<>]/g,'').trim()}
-function getDeviceId(){let d=localStorage.getItem('deviceId');if(!d){d='DEV-'+Math.random().toString(36).substr(2,9);localStorage.setItem('deviceId',d)}return d}
 
+const firebaseConfig = {
+  apiKey: "AIzaSyDbPsfTygtodq8THsbSNZ4y2UTO0qHgr_4",
+  authDomain: "ssnps-police-app-7018f.firebaseapp.com",
+  projectId: "ssnps-police-app-7018f",
+  storageBucket: "ssnps-police-app-7018f.firebasestorage.app",
+  messagingSenderId: "705275454318",
+  appId: "1:705275454318:web:a3cb76139563b6c33d977f"
+};
 document.getElementById('loginBtn').onclick=async()=>{
  const id=sanitize(document.getElementById('userId').value);
  const pass=document.getElementById('userPass').value.trim();
