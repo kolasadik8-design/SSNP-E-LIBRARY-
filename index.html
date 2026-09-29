@@ -3,72 +3,89 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>SSNPS V15.2 FIXED</title>
+<title>SSNPS E-Library V16</title>
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
 <style>
-*{box-sizing:border-box;margin:0;padding:0;font-family:sans-serif}
-body{background:#070a14;color:#eaf0ff;min-height:100vh}
-header{background:#111a33;padding:14px;display:flex;justify-content:space-between;position:sticky;top:0;z-index:20;border-bottom:1px solid #ffffff22}
-.card{background:#111a33;border:1px solid #ffffff12;border-radius:16px;padding:16px;margin:12px 0}
-.btn{background:#2d6bff;color:#fff;border:none;padding:11px 16px;border-radius:10px;cursor:pointer;font-weight:800}
-.btn.danger{background:#ff3b5c}.btn.small{padding:7px 12px;font-size:12px}.btn.ghost{background:transparent;border:1px solid #ffffff22;color:#fff}
-input{width:100%;padding:12px;margin:6px 0;border-radius:10px;background:#080c1d;color:#fff;border:1px solid #ffffff1f}
-#loginBox{max-width:420px;margin:60px auto;padding:24px}.hidden{display:none!important}
-.item{display:flex;justify-content:space-between;align-items:center;padding:10px;border-bottom:1px solid #ffffff0f}
-.badge{background:#1a274f;padding:4px 10px;border-radius:20px;font-size:11px}
-#pdfModal{position:fixed;inset:0;background:#000e;z-index:99;display:none;flex-direction:column}
+*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,Tajawal,sans-serif}
+body{background:#060a18;color:#eaf0ff;min-height:100vh}
+header{background:#101a38;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:30;border-bottom:1px solid #ffffff15}
+.card{background:#111c3e;border:1px solid #ffffff12;border-radius:16px;padding:16px;margin:12px 0}
+.btn{background:#2d6bff;color:#fff;border:none;padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:800}
+.btn.danger{background:#ff3b5c}.btn.small{padding:6px 10px;font-size:12px}.btn.ghost{background:transparent;border:1px solid #ffffff25}
+input,textarea,select{width:100%;padding:11px;margin:6px 0;border-radius:10px;background:#070c22;color:#fff;border:1px solid #ffffff1f}
+textarea{resize:vertical;min-height:70px}
+#loginBox{max-width:420px;margin:70px auto;padding:24px}.hidden{display:none!important}
+.item{display:flex;justify-content:space-between;align-items:center;padding:11px;border-bottom:1px solid #ffffff0f;gap:8px}
+.badge{background:#1b2a5a;padding:4px 10px;border-radius:20px;font-size:11px;border:1px solid #ffffff15}
+.announce{background:linear-gradient(135deg,#1a2a5a,#2a3a6a);border:1px solid #2d6bff55}
+#pdfModal,#examModal{position:fixed;inset:0;background:#000e;z-index:99;display:none;flex-direction:column}
+.q-card{background:#0e1938;padding:12px;border-radius:12px;margin:8px 0;border:1px solid #ffffff12}
 </style>
 </head>
 <body>
 <header>
-<div>🇸🇸 SSNPS E-LIBRARY</div>
+<div style="font-weight:900">🇸🇸 SSNPS E-LIBRARY V16</div>
 <div><button class="btn small ghost" id="langBtn">EN</button> <button class="btn small ghost" id="logoutBtn" style="display:none">Logout</button></div>
 </header>
 
 <div id="loginBox" class="card">
-<h3 id="t1">تسجيل دخول آمن</h3>
-<input id="userId" placeholder="ID">
+<h3 id="t_login">تسجيل دخول</h3>
+<input id="userId" placeholder="Police ID">
 <input id="userPass" type="password" placeholder="Password">
 <button class="btn" id="loginBtn" style="width:100%;margin-top:8px">دخول / LOGIN</button>
 <p id="loginMsg" style="color:#ff6b7a;margin-top:10px;font-size:13px"></p>
-<p style="font-size:11px;color:#8aa0d0;margin-top:10px">جرب: ADMIN / Admin@2026</p>
+<p style="font-size:11px;color:#8aa0d0;margin-top:8px">طوارئ: ADMIN / Admin@2026</p>
 </div>
 
-<div id="appBox" class="hidden" style="max-width:900px;margin:auto;padding:14px">
-<h3 id="welcome"></h3>
+<div id="appBox" class="hidden" style="max-width:980px;margin:auto;padding:12px">
+<div style="display:flex;justify-content:space-between;align-items:center"><h3 id="welcome"></h3><span id="roleBadge" class="badge"></span></div>
+
+<div class="card announce" id="announceSection">
+<h3>📢 الإعلانات / Announcements</h3>
+<div id="adminAnnounce" style="margin-top:10px"><textarea id="announceText" placeholder="اكتب إعلان جديد..."></textarea><button class="btn small" id="postAnnounceBtn">نشر الإعلان</button></div>
+<div id="announceList" style="margin-top:12px"></div>
+</div>
+
 <div class="card" id="adminCard">
-<h3>👮 إدارة الجنود</h3>
-<div style="display:flex;gap:8px;margin-top:10px"><input id="soldierName" placeholder="Full Name"><button class="btn" id="addSoldierBtn">إضافة</button></div>
+<h3>👮 إدارة الجنود - Password مخفي</h3>
+<div style="display:flex;gap:8px;margin-top:10px"><input id="soldierName" placeholder="الاسم الكامل"><button class="btn" id="addSoldierBtn">إضافة +</button></div>
 <div style="display:flex;gap:8px;margin:10px 0"><input id="searchSoldier" placeholder="بحث"><button class="btn small" id="searchSoldierBtn">بحث</button></div>
-<div id="soldiersList"></div>
-</div>
-<div class="card">
-<h3>📚 المكتبة</h3>
-<div id="adminUpload"><input type="file" id="pdfFile" accept="application/pdf"><input id="pdfTitle" placeholder="عنوان الكتاب"><button class="btn danger" id="addBookBtn" style="width:100%">رفع</button><p id="uploadStatus" style="font-size:12px"></p></div>
-<div id="booksList" style="margin-top:10px"></div>
-</div>
-<div class="card"><h3>📞 Contact Us</h3><p style="font-size:13px;color:#8aa0d0;margin-top:6px">Juba, South Sudan - support@ssnps.gov.ss - +211 912 345 678</p></div>
+<div id="soldiersList">Loading...</div>
 </div>
 
-<div id="pdfModal"><div style="display:flex;justify-content:space-between;padding:12px;background:#111a33"><span id="modalTitle"></span><button class="btn small danger" onclick="closeViewer()">إغلاق</button></div><div id="pdfViewer" style="flex:1;background:#000"></div></div>
+<div class="card">
+<h3>📚 المكتبة + الامتحانات</h3>
+<div id="adminUpload" style="margin-top:10px">
+<input type="file" id="pdfFile" accept="application/pdf"><input id="pdfTitle" placeholder="عنوان الكتاب">
+<button class="btn danger" id="addBookBtn" style="width:100%">رفع الكتاب</button>
+<p id="uploadStatus" style="font-size:12px;color:#8aa0d0"></p>
+</div>
+<div id="booksList" style="margin-top:12px"></div>
+</div>
+
+<div class="card"><h3>📞 Contact Us</h3><p style="font-size:13px;color:#8aa0d0;margin-top:6px">SSNPS Academy - Juba - support@ssnps.gov.ss - +211 912 345 678</p></div>
+</div>
+
+<div id="pdfModal"><div style="display:flex;justify-content:space-between;padding:12px;background:#101a38"><span id="modalTitle"></span><button class="btn small danger" onclick="closeViewer('pdfModal')">✕</button></div><div id="pdfViewer" style="flex:1;background:#000"></div></div>
+
+<div id="examModal"><div style="display:flex;justify-content:space-between;padding:12px;background:#101a38"><span id="examTitle"></span><button class="btn small danger" onclick="closeViewer('examModal')">✕</button></div><div style="padding:14px;overflow:auto;flex:1"><div id="examContent"></div><div id="examResult" style="margin-top:12px"></div></div></div>
 
 <script>
-console.log('V15.2 loaded');
 const firebaseConfig={apiKey:"AIzaSyDbPsfTygtodq8THsbSNZ4y2UTO0qHgr_4",authDomain:"ssnps-police-app-7018f.firebaseapp.com",projectId:"ssnps-police-app-7018f",storageBucket:"ssnps-police-app-7018f.firebasestorage.app",messagingSenderId:"705275454318",appId:"1:705275454318:web:a3cb76139563b6c33d977f"};
 firebase.initializeApp(firebaseConfig);
 const db=firebase.firestore();
 let currentUser=null, allSoldiers=[], allBooks=[], lang='ar';
-const esc=s=> (s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const esc=s=> (s||'').toString().replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 
+// لغة
 document.getElementById('langBtn').onclick=()=>{
  lang=lang==='ar'?'en':'ar';
  document.getElementById('langBtn').textContent=lang==='ar'?'EN':'عربي';
- document.getElementById('t1').textContent=lang==='ar'?'تسجيل دخول آمن':'Secure Login';
  document.documentElement.dir=lang==='ar'?'rtl':'ltr';
- alert(lang==='ar'?'تم تغيير اللغة لعربي':'Language changed to English');
 };
 
+// دخول آمن
 document.getElementById('loginBtn').onclick=async()=>{
  const id=document.getElementById('userId').value.trim();
  const pass=document.getElementById('userPass').value.trim();
@@ -76,14 +93,15 @@ document.getElementById('loginBtn').onclick=async()=>{
  if(!id||!pass){msg.textContent='ادخل البيانات';return}
  msg.textContent='جاري...';
  if((id==='ADMIN' && pass==='Admin@2026') || (id==='SSNPS-5293' && pass==='5293')){
-   currentUser={name:'Admin',id:id,role:'admin'}; showApp(); return;
+   currentUser={name:'Super Admin',id:id,role:'admin'}; showApp(); return;
  }
  try{
    let doc=await db.collection('soldiers').doc(id).get();
    if(!doc.exists) doc=await db.collection('admins').doc(id).get();
    if(!doc.exists){msg.textContent='ID غير موجود';return}
-   if(doc.data().pass!==pass){msg.textContent='باسورد غلط';return}
-   currentUser=doc.data(); showApp();
+   const data=doc.data();
+   if(!data.pass || data.pass!==pass){msg.textContent='باسورد غلط';return}
+   currentUser=data; showApp();
  }catch(e){msg.textContent='خطأ: '+e.message}
 };
 
@@ -91,33 +109,132 @@ function showApp(){
  document.getElementById('loginBox').classList.add('hidden');
  document.getElementById('appBox').classList.remove('hidden');
  document.getElementById('logoutBtn').style.display='inline-block';
- document.getElementById('welcome').textContent='مرحب: '+currentUser.name+' ('+currentUser.role+')';
- if(currentUser.role!=='admin'){document.getElementById('adminCard').style.display='none';document.getElementById('adminUpload').style.display='none';}
- loadSoldiers(); loadBooks();
+ document.getElementById('welcome').textContent='مرحب: '+esc(currentUser.name);
+ document.getElementById('roleBadge').textContent=esc(currentUser.role||'soldier');
+ if(currentUser.role!=='admin'){document.getElementById('adminCard').style.display='none';document.getElementById('adminUpload').style.display='none';document.getElementById('adminAnnounce').style.display='none';}
+ loadSoldiers(); loadBooks(); loadAnnouncements();
 }
 document.getElementById('logoutBtn').onclick=()=>location.reload();
+
+// إعلانات
+document.getElementById('postAnnounceBtn').onclick=async()=>{
+ const txt=document.getElementById('announceText').value.trim(); if(!txt) return;
+ if(currentUser.role!=='admin') return;
+ await db.collection('announcements').add({text:txt,created:Date.now(),by:currentUser.name});
+ document.getElementById('announceText').value=''; loadAnnouncements();
+};
+async function loadAnnouncements(){
+ try{
+  const snap=await db.collection('announcements').orderBy('created','desc').limit(20).get();
+  let h=''; snap.forEach(d=>{const a=d.data(); h+='<div class="q-card"><b>'+esc(a.by)+'</b> <span style="font-size:11px;color:#8aa0d0">'+new Date(a.created).toLocaleString()+'</span><p style="margin-top:6px">'+esc(a.text)+'</p>'+(currentUser.role==='admin'?'<button class="btn small danger" onclick="delAnn(\''+d.id+'\')" style="margin-top:6px">مسح</button>':'')+'</div>';});
+  document.getElementById('announceList').innerHTML=h||'لا يوجد إعلانات';
+ }catch(e){document.getElementById('announceList').textContent=e.message}
+}
+window.delAnn=async(id)=>{if(!confirm('مسح الإعلان؟')) return; await db.collection('announcements').doc(id).delete(); loadAnnouncements();};
+
+// جنود - كلمة المرور مخفية تماما
 document.getElementById('addSoldierBtn').onclick=async()=>{
+ if(currentUser.role!=='admin') return alert('للأدمن فقط');
  const name=document.getElementById('soldierName').value.trim(); if(!name) return;
  const newId='SSNPS-'+Math.floor(1000+Math.random()*9000);
- const pass=Math.random().toString(36).slice(-6).toUpperCase();
- await db.collection('soldiers').doc(newId).set({name:name,id:newId,pass:pass,created:Date.now(),role:'soldier'});
- document.getElementById('soldierName').value=''; loadSoldiers();
- alert('تم: '+newId);
+ const pass=Math.random().toString(36).slice(-8).toUpperCase();
+ try{
+  await db.collection('soldiers').doc(newId).set({name:name,id:newId,pass:pass,created:Date.now(),role:'soldier'});
+  document.getElementById('soldierName').value=''; loadSoldiers();
+  alert('تمت الإضافة: '+newId+' - الباسورد مخفي وسيعطى للجندي بطريقة آمنة');
+ }catch(e){alert(e.message)}
 };
-async function loadSoldiers(){try{const snap=await db.collection('soldiers').orderBy('created','desc').limit(100).get(); allSoldiers=[]; snap.forEach(d=>allSoldiers.push(d.data())); renderSoldiers(allSoldiers)}catch(e){document.getElementById('soldiersList').textContent=e.message}}
-function renderSoldiers(list){let h='<b>Total: '+list.length+'</b><br><br>'; list.forEach(x=>{h+='<div class="item"><span>'+esc(x.name)+'</span><span class="badge">'+esc(x.id)+'</span></div>'}); document.getElementById('soldiersList').innerHTML=h||'لا يوجد';}
-document.getElementById('searchSoldierBtn').onclick=()=>{const q=document.getElementById('searchSoldier').value.toLowerCase(); renderSoldiers(allSoldiers.filter(s=>s.name.toLowerCase().includes(q)||s.id.toLowerCase().includes(q)))};
+async function loadSoldiers(){
+ try{const snap=await db.collection('soldiers').orderBy('created','desc').limit(200).get(); allSoldiers=[]; snap.forEach(d=>allSoldiers.push(d.data())); renderSoldiers(allSoldiers)}catch(e){document.getElementById('soldiersList').textContent=e.message}
+}
+function renderSoldiers(list){
+ let h='<b>العدد: '+list.length+'</b><br><br>';
+ list.forEach(x=>{
+  const safeName=esc(x.name); const safeId=esc(x.id);
+  h+='<div class="item"><span>'+safeName+'</span><span><span class="badge">'+safeId+'</span>';
+  if(currentUser.role==='admin'){h+='<button class="btn small danger" style="margin-inline-start:8px" onclick="deleteSoldier(\''+safeId+'\')">مسح</button>';}
+  h+='</span></div>';
+ });
+ document.getElementById('soldiersList').innerHTML=h;
+}
+window.deleteSoldier=async(id)=>{
+ if(currentUser.role!=='admin') return;
+ if(!confirm('متأكد عايز تمسح الجندي '+id+' ؟')) return;
+ try{await db.collection('soldiers').doc(id).delete(); loadSoldiers();}catch(e){alert(e.message)}
+};
+document.getElementById('searchSoldierBtn').onclick=()=>{const q=document.getElementById('searchSoldier').value.toLowerCase(); const filtered=allSoldiers.filter(s=>s.name.toLowerCase().includes(q)||s.id.toLowerCase().includes(q)); renderSoldiers(filtered);};
+
+// كتب
 document.getElementById('addBookBtn').onclick=async()=>{
+ if(currentUser.role!=='admin') return;
  const file=document.getElementById('pdfFile').files[0]; const title=document.getElementById('pdfTitle').value.trim();
- if(!file||!title){document.getElementById('uploadStatus').textContent='اختر ملف';return}
+ if(!file||!title){document.getElementById('uploadStatus').textContent='اختر ملف واسم';return}
+ if(file.size>900*1024){document.getElementById('uploadStatus').textContent='الملف كبير >900KB';return}
+ document.getElementById('uploadStatus').textContent='جاري الرفع...';
  const reader=new FileReader();
- reader.onload=async e=>{await db.collection('library').add({title:title,data:e.target.result,created:Date.now()}); document.getElementById('uploadStatus').textContent='✅ تم'; loadBooks();};
+ reader.onload=async function(e){
+  try{await db.collection('library').add({title:title,data:e.target.result,created:Date.now(),by:currentUser.name}); document.getElementById('uploadStatus').textContent='✅ تم'; document.getElementById('pdfTitle').value=''; loadBooks();}catch(err){document.getElementById('uploadStatus').textContent=err.message}
+ };
  reader.readAsDataURL(file);
 };
-async function loadBooks(){try{const snap=await db.collection('library').orderBy('created','desc').limit(50).get(); allBooks=[]; snap.forEach(d=>allBooks.push({fid:d.id,...d.data()})); renderBooks(allBooks)}catch(e){document.getElementById('booksList').textContent=e.message}}
-function renderBooks(list){let h=list.length?'':'لا يوجد كتب'; list.forEach(b=>{h+='<div class="item"><span>'+esc(b.title)+'</span><button class="btn small" onclick="viewOnly(\''+b.fid+'\')">قراءة</button></div>'}); document.getElementById('booksList').innerHTML=h;}
-window.viewOnly=fid=>{const b=allBooks.find(x=>x.fid===fid); document.getElementById('modalTitle').textContent=b.title; document.getElementById('pdfViewer').innerHTML='<iframe src="'+b.data+'#toolbar=0" style="width:100%;height:90vh;border:none"></iframe>'; document.getElementById('pdfModal').style.display='flex';};
-window.closeViewer=()=>{document.getElementById('pdfModal').style.display='none';};
+async function loadBooks(){
+ try{const snap=await db.collection('library').orderBy('created','desc').limit(100).get(); allBooks=[]; snap.forEach(d=>allBooks.push({fid:d.id,...d.data()})); renderBooks(allBooks)}catch(e){document.getElementById('booksList').textContent=e.message}
+}
+function renderBooks(list){
+ let h=list.length?'':'لا يوجد كتب';
+ list.forEach(b=>{
+  const safeTitle=esc(b.title);
+  if(currentUser.role==='soldier'){
+    h+='<div class="item"><span><b>'+safeTitle+'</b></span><span><button class="btn small" onclick="viewOnly(\''+b.fid+'\')">قراءة</button> <button class="btn small ghost" onclick="openExam(\''+b.fid+'\')">امتحان</button></span></div>';
+  } else {
+    h+='<div class="item"><span><b>'+safeTitle+'</b></span><span><button class="btn small" onclick="viewOnly(\''+b.fid+'\')">قراءة</button> <button class="btn small" onclick="createExam(\''+b.fid+'\')">+ امتحان</button> <button class="btn small ghost" onclick="openExam(\''+b.fid+'\')">عرض الامتحان</button> <button class="btn small danger" onclick="deleteBook(\''+b.fid+'\')">مسح</button></span></div>';
+  }
+ });
+ document.getElementById('booksList').innerHTML=h;
+}
+window.viewOnly=fid=>{const b=allBooks.find(x=>x.fid===fid); if(!b) return; document.getElementById('modalTitle').textContent=b.title; document.getElementById('pdfViewer').innerHTML='<iframe src="'+b.data+'#toolbar=0&navpanes=0" style="width:100%;height:90vh;border:none"></iframe>'; document.getElementById('pdfModal').style.display='flex';};
+window.closeViewer=id=>{document.getElementById(id).style.display='none'; if(id==='pdfModal') document.getElementById('pdfViewer').innerHTML='';};
+window.deleteBook=async(fid)=>{if(currentUser.role!=='admin') return; if(!confirm('مسح الكتاب؟')) return; await db.collection('library').doc(fid).delete(); loadBooks();};
+
+// امتحانات
+window.createExam=async(fid)=>{
+ if(currentUser.role!=='admin') return;
+ const book=allBooks.find(x=>x.fid===fid);
+ const q1=prompt('سؤال 1 للكتاب: '+book.title+'\nاكتب السؤال:'); if(!q1) return;
+ const a1=prompt('الإجابة الصحيحة:'); const b1=prompt('إجابة خاطئة 1:'); const c1=prompt('إجابة خاطئة 2:');
+ if(!a1||!b1||!c1) return;
+ const questions=[{q:q1,options:[a1,b1,c1].sort(()=>Math.random()-0.5),correct:a1}];
+ try{await db.collection('exams').doc(fid).set({bookId:fid,bookTitle:book.title,questions:questions,created:Date.now()}); alert('تم إنشاء الامتحان');}catch(e){alert(e.message)}
+};
+window.openExam=async(fid)=>{
+ const doc=await db.collection('exams').doc(fid).get();
+ if(!doc.exists){alert('لا يوجد امتحان لهذا الكتاب بعد');return}
+ const exam=doc.data();
+ document.getElementById('examTitle').textContent='امتحان: '+exam.bookTitle;
+ let h='';
+ exam.questions.forEach((qq,i)=>{
+  h+='<div class="q-card"><p><b>'+(i+1)+'. '+esc(qq.q)+'</b></p>';
+  qq.options.forEach((opt,j)=>{h+='<label style="display:block;margin:6px 0"><input type="radio" name="q'+i+'" value="'+esc(opt)+'"> '+esc(opt)+'</label>';});
+  h+='</div>';
+ });
+ h+='<button class="btn" onclick="submitExam(\''+fid+'\')">إرسال الإجابات</button>';
+ document.getElementById('examContent').innerHTML=h;
+ document.getElementById('examResult').innerHTML='';
+ document.getElementById('examModal').style.display='flex';
+};
+window.submitExam=async(fid)=>{
+ const doc=await db.collection('exams').doc(fid).get(); const exam=doc.data();
+ let score=0;
+ exam.questions.forEach((qq,i)=>{
+  const sel=document.querySelector('input[name="q'+i+'"]:checked');
+  if(sel && sel.value===qq.correct) score++;
+ });
+ const percent=Math.round((score/exam.questions.length)*100);
+ document.getElementById('examResult').innerHTML='<div class="card" style="background:#0f2a1f">نتيجتك: '+score+'/'+exam.questions.length+' = '+percent+'% '+(percent>=50?'✅ ناجح':'❌ راسب')+'</div>';
+ if(currentUser.role==='soldier'){
+  await db.collection('results').add({soldierId:currentUser.id,soldierName:currentUser.name,bookId:fid,bookTitle:exam.bookTitle,score:score,percent:percent,created:Date.now()});
+ }
+};
 </script>
 </body>
 </html>
