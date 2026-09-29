@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SSNPS Academy - V13.3 SECURE</title>
-<link rel="manifest" href="manifest.json">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;font-family:Inter,Arial,sans-serif}
 body{background:#0a0e1a;color:#fff;min-height:100vh}
@@ -55,45 +54,37 @@ input{width:100%;padding:12px;margin:6px 0;border-radius:10px;background:#0a0e1a
 </div>
 
 <script>
+const firebaseConfig = { apiKey: "AIzaSyDbPsfTygtodq8THsbSNZ4y2UTO0qHgr_4", authDomain: "ssnps-police-app-7018f.firebaseapp.com", projectId: "ssnps-police-app-7018f", storageBucket: "ssnps-police-app-7018f.firebasestorage.app", messagingSenderId: "705275454318", appId: "1:705275454318:web:a3cb76139563b6c33d977f" };
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+let currentUser=null; let allSoldiers=[]; let allBooks=[];
+function sanitize(s){return (s||'').trim()}
+function escapeHtml(s){return (s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function getDeviceId(){let d=localStorage.getItem('deviceId');if(!d){d='dev-'+Math.random().toString(36).slice(2);localStorage.setItem('deviceId',d)}return d}
 
-const firebaseConfig = {
-  apiKey: "AIzaSyDbPsfTygtodq8THsbSNZ4y2UTO0qHgr_4",
-  authDomain: "ssnps-police-app-7018f.firebaseapp.com",
-  projectId: "ssnps-police-app-7018f",
-  storageBucket: "ssnps-police-app-7018f.firebasestorage.app",
-  messagingSenderId: "705275454318",
-  appId: "1:705275454318:web:a3cb76139563b6c33d977f"
-};
 document.getElementById('loginBtn').onclick=async()=>{
  const id=sanitize(document.getElementById('userId').value);
  const pass=document.getElementById('userPass').value.trim();
  if(!id||!pass){document.getElementById('loginMsg').textContent='ادخل البيانات';return}
  const logged=localStorage.getItem('loggedSoldierId');
- if(logged && logged!==id){
-   document.getElementById('loginMsg').textContent='هذا الهاتف مسجل به: '+logged+' - ممنوع حسابين';
-   return;
- }
+ if(logged && logged!==id){document.getElementById('loginMsg').textContent='هذا الهاتف مسجل به: '+logged+' - ممنوع حسابين';return}
  document.getElementById('loginMsg').textContent='جاري التحقق...';
  try{
-  const admin=await db.collection('admins').doc(id).get();
-  if(admin.exists && admin.data().pass===pass){currentUser=admin.data();localStorage.setItem('loggedSoldierId',id);getDeviceId();showApp();return}
-  const doc=await db.collection('soldiers').doc(id).get();
-  if(doc.exists && doc.data().pass===pass){currentUser=doc.data();localStorage.setItem('loggedSoldierId',id);getDeviceId();showApp();return}
- }catch(e){console.error(e)}
+   const admin=await db.collection('admins').doc(id).get();
+   if(admin.exists && admin.data().pass===pass){currentUser=admin.data();localStorage.setItem('loggedSoldierId',id);getDeviceId();showApp();return}
+   const doc=await db.collection('soldiers').doc(id).get();
+   if(doc.exists && doc.data().pass===pass){currentUser=doc.data();localStorage.setItem('loggedSoldierId',id);getDeviceId();showApp();return}
+ }catch(e){console.error(e); document.getElementById('loginMsg').textContent='خطأ اتصال: '+e.message; return}
  document.getElementById('loginMsg').textContent='بيانات غير صحيحة';
 };
-
 function showApp(){
  document.getElementById('loginBox').classList.add('hidden');
  document.getElementById('appBox').classList.remove('hidden');
  document.getElementById('welcome').textContent='مرحب: '+escapeHtml(currentUser.name)+' ('+(currentUser.role||'soldier')+')';
- if(currentUser.role!=='admin'){
-  document.getElementById('adminOnlyCard').style.display='none';
-  document.addEventListener('contextmenu',e=>e.preventDefault());
- }
+ if(currentUser.role!=='admin'){document.getElementById('adminOnlyCard').style.display='none';document.addEventListener('contextmenu',e=>e.preventDefault());}
  loadSoldiers();loadBooks();
 }
-document.getElementById('logoutBtn').onclick=()=>location.reload();
+document.getElementById('logoutBtn').onclick=()=>{localStorage.removeItem('loggedSoldierId');location.reload()};
 document.getElementById('addSoldierBtn').onclick=async()=>{
  const name=sanitize(document.getElementById('soldierName').value);if(!name)return;
  const newId='SSNPS-'+Math.floor(1000+Math.random()*9000);const pass=newId.split('-')[1];
@@ -104,20 +95,15 @@ async function loadSoldiers(){const snap=await db.collection('soldiers').orderBy
 function renderSoldiers(list){
  let html=`<b>Total: ${list.length}</b><br><br>`;
  list.forEach(x=>{
-  if(currentUser.role==='admin'){
-    html+=`<div class="item"><span>${escapeHtml(x.name)}</span><span><span class="badge">${escapeHtml(x.id)}</span><button class="btn small dark" style="margin-left:8px" onclick="deleteSoldier('${x.id}')">مسح</button></span></div>`;
-  }else{
-    html+=`<div class="item"><span>${escapeHtml(x.name)}</span><span class="badge">${escapeHtml(x.id)}</span></div>`;
-  }
+   if(currentUser.role==='admin'){
+     html+=`<div class="item"><span>${escapeHtml(x.name)}</span><span><span class="badge">${escapeHtml(x.id)}</span><button class="btn small dark" style="margin-left:8px" onclick="deleteSoldier('${x.id}')">مسح</button></span></div>`;
+   }else{
+     html+=`<div class="item"><span>${escapeHtml(x.name)}</span><span class="badge">${escapeHtml(x.id)}</span></div>`;
+   }
  });
  document.getElementById('soldiersList').innerHTML=html||'لا يوجد';
 }
-async function deleteSoldier(id){
- if(currentUser.role!=='admin')return;
- if(!confirm('هل تريد مسح '+id+' ؟'))return;
- await db.collection('soldiers').doc(id).delete();
- loadSoldiers();
-}
+async function deleteSoldier(id){if(currentUser.role!=='admin')return;if(!confirm('هل تريد مسح '+id+' ؟'))return;await db.collection('soldiers').doc(id).delete();loadSoldiers();}
 document.getElementById('searchSoldierBtn').onclick=()=>{const q=document.getElementById('searchSoldier').value.toLowerCase();renderSoldiers(allSoldiers.filter(s=>s.name.toLowerCase().includes(q)||s.id.toLowerCase().includes(q)))};
 document.getElementById('addBookBtn').onclick=async()=>{
  if(currentUser.role!=='admin'){alert('للإدارة فقط');return}
@@ -126,34 +112,21 @@ document.getElementById('addBookBtn').onclick=async()=>{
  if(file.size>900*1024){document.getElementById('uploadStatus').textContent='الملف كبير >900KB';return}
  document.getElementById('uploadStatus').textContent='جاري الرفع...';
  const reader=new FileReader();
- reader.onload=async(e=>{
-  try{await db.collection('library').add({title,data:e.target.result,size:file.size,created:Date.now()});document.getElementById('uploadStatus').textContent='✅ تم';document.getElementById('pdfTitle').value='';loadBooks()}catch(err){document.getElementById('uploadStatus').textContent=err.message}
- });
+ reader.onload=async(e=>{try{await db.collection('library').add({title,data:e.target.result,size:file.size,created:Date.now()});document.getElementById('uploadStatus').textContent='✅ تم';document.getElementById('pdfTitle').value='';loadBooks()}catch(err){document.getElementById('uploadStatus').textContent=err.message}});
  reader.readAsDataURL(file);
 };
 async function loadBooks(){const snap=await db.collection('library').orderBy('created','desc').limit(50).get();allBooks=[];snap.forEach(d=>allBooks.push({fid:d.id,...d.data()}));renderBooks(allBooks)}
 function renderBooks(list){
  let html=list.length?'':'لا يوجد كتب';
  list.forEach(b=>{
-  if(currentUser.role==='soldier'){
-   html+=`<div class="item"><span><b>${escapeHtml(b.title)}</b></span><button class="btn small" onclick="viewOnly('${b.fid}')">👁️ قراءة</button></div>`;
-  }else{
-   html+=`<div class="item"><span><b>${escapeHtml(b.title)}</b></span><button class="btn small" onclick="downloadBook('${b.fid}')">تحميل</button></div>`;
-  }
+   if(currentUser.role==='soldier'){html+=`<div class="item"><span><b>${escapeHtml(b.title)}</b></span><button class="btn small" onclick="viewOnly('${b.fid}')">👁️ قراءة</button></div>`;}
+   else{html+=`<div class="item"><span><b>${escapeHtml(b.title)}</b></span><button class="btn small" onclick="downloadBook('${b.fid}')">تحميل</button></div>`;}
  });
  document.getElementById('booksList').innerHTML=html;
 }
-window.downloadBook=(fid)=>{
- if(currentUser.role==='soldier'){alert('ممنوع - قراءة فقط');return}
- const b=allBooks.find(x=>x.fid===fid);const a=document.createElement('a');a.href=b.data;a.download=b.title+'.pdf';a.click();
-};
-window.viewOnly=(fid)=>{
- const b=allBooks.find(x=>x.fid===fid);
- document.getElementById('modalTitle').textContent=b.title;
- document.getElementById('pdfViewer').innerHTML=`<iframe src="${b.data}#toolbar=0&navpanes=0" style="width:100%;height:90vh;border:none"></iframe>`;
- document.getElementById('pdfModal').style.display='flex';
-};
+window.downloadBook=(fid)=>{if(currentUser.role==='soldier'){alert('ممنوع - قراءة فقط');return}const b=allBooks.find(x=>x.fid===fid);const a=document.createElement('a');a.href=b.data;a.download=b.title+'.pdf';a.click();};
+window.viewOnly=(fid)=>{const b=allBooks.find(x=>x.fid===fid);document.getElementById('modalTitle').textContent=b.title;document.getElementById('pdfViewer').innerHTML=`<iframe src="${b.data}#toolbar=0&navpanes=0" style="width:100%;height:90vh;border:none"></iframe>`;document.getElementById('pdfModal').style.display='flex';};
 window.closeViewer=()=>{document.getElementById('pdfModal').style.display='none';document.getElementById('pdfViewer').innerHTML=''};
 </script>
 </body>
-  </html>
+</html>
