@@ -1,17 +1,15 @@
 {
-  "name": "SSNPS - South Sudan National Police",
+  "name": "SSNPS E-Library",
   "short_name": "SSNPS",
-  "description": "Secure Soldier Management System - SSNPS",
-  "start_url": "/",
+  "start_url": "/SSNP-E-LIBRARY/",
   "display": "standalone",
-  "background_color": "#0f172a",
-  "theme_color": "#0f172a",
+  "background_color": "#060a18",
+  "theme_color": "#101a38",
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/3064/3064197.png",
+      "src": "https://cdn-icons-png.flaticon.com/512/29/29302.png",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     }
   ]
 }
