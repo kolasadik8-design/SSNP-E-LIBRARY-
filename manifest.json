@@ -1,15 +1,2 @@
-{
-  "name": "SSNPS E-Library",
-  "short_name": "SSNPS",
-  "start_url": "/SSNP-E-LIBRARY/",
-  "display": "standalone",
-  "background_color": "#060a18",
-  "theme_color": "#101a38",
-  "icons": [
-    {
-      "src": "https://cdn-icons-png.flaticon.com/512/29/29302.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
-  ]
-}
+self.addEventListener('install', e => self.skipWaiting());
+self.addEventListener('activate', e => self.clients.claim());
