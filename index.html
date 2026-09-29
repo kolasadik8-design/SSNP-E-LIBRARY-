@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+  <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#101a38">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>SSNPS V16.1</title>
@@ -34,6 +36,9 @@ input,textarea{width:100%;padding:11px;margin:6px 0;border-radius:10px;backgroun
 }
 </style>
 </head>
+  <script>
+if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js')}
+  </script>
 <body>
 <header>
 <div style="font-weight:900">🇸🇸 SSNPS E-LIBRARY V16.1</div>
