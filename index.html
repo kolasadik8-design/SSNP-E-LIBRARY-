@@ -96,8 +96,12 @@ document.getElementById('loginBtn').onclick=async()=>{
  const id=document.getElementById('userId').value.trim(); const pass=document.getElementById('userPass').value.trim(); const msg=document.getElementById('loginMsg');
  if(!id||!pass){msg.textContent='ادخل البيانات';return} msg.textContent='جاري...';
  if((id==='ADMIN' && pass==='Admin@2026') || (id==='SSNPS-5293' && pass==='5293')){currentUser={name:'Admin',id:id,role:'admin'}; showApp(); return;}
- try{let doc=await db.collection('soldiers').doc(id).get(); if(!doc.exists) doc=await db.collection('admins').doc(id).get(); if(!doc.exists){msg.textContent='ID غير موجود';return} if(doc.data().pass!==pass){msg.textContent='باسورد غلط';return} currentUser=doc.data(); showApp();}catch(e){msg.textContent='خطأ: '+e.message}
-};
+ try{
+  let doc=await db.collection('admins').doc(id).get();
+  if(!doc.exists){
+    doc=await db.collection('soldiers').doc(id).get();
+  }
+
 function showApp(){document.getElementById('loginBox').classList.add('hidden'); document.getElementById('appBox').classList.remove('hidden'); document.getElementById('logoutBtn').style.display='inline-block'; document.getElementById('welcome').textContent='مرحب: '+esc(currentUser.name); document.getElementById('roleBadge').textContent=esc(currentUser.role); if(currentUser.role!=='admin'){document.getElementById('adminCard').style.display='none';document.getElementById('adminUpload').style.display='none';document.getElementById('adminAnnounce').style.display='none';} loadSoldiers(); loadBooks(); loadAnnouncements();}
 document.getElementById('logoutBtn').onclick=()=>location.reload();
 document.getElementById('postAnnounceBtn').onclick=async()=>{const txt=document.getElementById('announceText').value.trim(); if(!txt||currentUser.role!=='admin') return; await db.collection('announcements').add({text:txt,created:Date.now(),by:currentUser.name}); document.getElementById('announceText').value=''; loadAnnouncements();};
