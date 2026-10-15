@@ -3,58 +3,63 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Police Batch Portal - Secure Access</title>
+<title>Police Batch - Secure Portal</title>
+<!-- Firebase SDK - LINE 6 to 9 -->
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-storage-compat.js"></script>
 <style>
-  *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
-  body{background:#0f172a;color:#fff;display:flex;justify-content:center;align-items:center;height:100vh;
-       user-select:none;-webkit-user-select:none;} /* Prevent Text Selection */
-  .login-box{background:#1e293b;padding:40px;border-radius:12px;width:380px;box-shadow:0 0 20px rgba(0,0,0,0.5)}
-  h2{text-align:center;margin-bottom:20px;color:#38bdf8}
-  input{width:100%;padding:12px;margin:10px 0;border-radius:6px;border:none;background:#334155;color:#fff}
-  button{width:100%;padding:12px;background:#0ea5e9;border:none;border-radius:6px;color:#fff;font-weight:bold;cursor:pointer;margin-top:10px}
-  button:hover{background:#0284c7}
-  .footer{text-align:center;margin-top:15px;font-size:12px;color:#94a3b8}
-  /* Watermark */
-  .watermark{position:fixed;pointer-events:none;opacity:0.07;font-size:22px;transform:rotate(-30deg);z-index:9999;white-space:nowrap}
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial}
+body{background:#0f172a;color:#fff;display:flex;justify-content:center;align-items:center;height:100vh;user-select:none}
+.box{background:#1e293b;padding:30px;border-radius:12px;width:400px}
+input,button{width:100%;padding:12px;margin:8px 0;border-radius:6px;border:none}
+input{background:#334155;color:#fff} button{background:#0ea5e9;color:#fff;font-weight:bold;cursor:pointer}
 </style>
 </head>
 <body oncontextmenu="return false;">
-
-<div class="login-box">
-  <h2>BATCH SECURE LOGIN</h2>
-  <p style="text-align:center;font-size:13px;color:#94a3b8;margin-bottom:15px;">Admin-Only Registration - No Public Sign-up</p>
-  <form action="api/login.php" method="POST" id="loginForm">
-    <input type="text" name="military_id" placeholder="Military ID" required>
-    <input type="password" name="password" placeholder="Password" required>
-    <button type="submit">Secure Login</button>
-  </form>
-  <div class="footer">Protected System - Screenshot & Download Disabled<br>© Police Batch 2026</div>
+<div class="box">
+<h2 style="text-align:center;color:#38bdf8;">BATCH SECURE LOGIN</h2>
+<input id="milId" placeholder="Military ID">
+<input id="pass" type="password" placeholder="Password">
+<button onclick="login()">Login</button>
+<p id="msg" style="color:#f87171;text-align:center;margin-top:10px;"></p>
 </div>
 
-<script src="js/secure_viewer.js"></script>
 <script>
-// Web Protection - Block Screenshot Keys
-document.addEventListener('keydown', function(e){
-  if(e.key === 'PrintScreen' || (e.ctrlKey && (e.key==='s' || e.key==='p' || e.key==='c' || e.key==='u'))){
-    e.preventDefault();
-    alert('This action is disabled for security reasons.');
-    return false;
-  }
-});
-// Blur when user switches tab (anti screen record)
-document.addEventListener('visibilitychange', function(){
-  if(document.hidden){ document.body.style.filter='blur(15px)'; }
-  else{ document.body.style.filter='none'; }
-});
-// Dynamic Watermark if logged in
-const user = localStorage.getItem('officer_name');
-if(user){
-  const wm = document.createElement('div');
-  wm.className='watermark';
-  wm.innerText = user + ' | ' + localStorage.getItem('military_id') + ' | ' + new Date().toLocaleString();
-  wm.style.top='40%'; wm.style.left='10%';
-  document.body.appendChild(wm);
+// LINE 32 - FIREBASE CONFIG - Replace with your config from Firebase Console
+const firebaseConfig = {
+  apiKey: "AIzaSyDbPsfTygtodq8THsbSNZ4y2UTO0qHgr_4",
+  authDomain: "ssnps-police-app-7018f.firebaseapp.com",
+  projectId: "ssnps-police-app-7018f",
+  storageBucket: "ssnps-police-app-7018f.firebasestorage.app",
+  messagingSenderId: "705275454318",
+  appId: "1:705275454318:web:4ac5261ba5beb6c33d977f"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+// LINE 45 - LOGIN FUNCTION
+async function login(){
+  const militaryId = document.getElementById('milId').value.trim();
+  const password = document.getElementById('pass').value.trim();
+  // Find email by military_id
+  const snap = await db.collection('officers').where('military_id','==',militaryId).get();
+  if(snap.empty){ document.getElementById('msg').innerText='ID not found - Contact Admin'; return; }
+  const email = snap.docs[0].data().email;
+  try{
+    await auth.signInWithEmailAndPassword(email, password);
+    localStorage.setItem('officer', JSON.stringify(snap.docs[0].data()));
+    window.location.href='dashboard.html';
+  }catch(e){ document.getElementById('msg').innerText=e.message; }
 }
+
+// Anti Screenshot Protection
+document.addEventListener('keydown', e=>{
+  if(e.key==='PrintScreen' || (e.ctrlKey && ['s','p','c'].includes(e.key.toLowerCase()))){ e.preventDefault(); alert('Action Disabled'); }
+});
+document.addEventListener('visibilitychange', ()=>{ document.body.style.filter=document.hidden?'blur(20px)':'none'; });
 </script>
 </body>
 </html>
