@@ -1,126 +1,60 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en">
 <head>
-  <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#101a38">
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>SSNPS V16.1</title>
-<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Police Batch Portal - Secure Access</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,Tajawal,sans-serif}
-body{background:#060a18;color:#eaf0ff;min-height:100vh}
-header{background:#101a38;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:30;border-bottom:1px solid #ffffff15}
-.card{background:#111c3e;border:1px solid #ffffff12;border-radius:16px;padding:16px;margin:12px 0}
-.btn{background:#2d6bff;color:#fff;border:none;padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:800}
-.btn.danger{background:#ff3b5c}.btn.small{padding:6px 10px;font-size:12px}.btn.ghost{background:transparent;border:1px solid #ffffff25}
-input,textarea{width:100%;padding:11px;margin:6px 0;border-radius:10px;background:#070c22;color:#fff;border:1px solid #ffffff1f}
-#loginBox{max-width:420px;margin:70px auto;padding:24px}.hidden{display:none!important}
-.item{display:flex;justify-content:space-between;align-items:center;padding:11px;border-bottom:1px solid #ffffff0f}
-.badge{background:#1b2a5a;padding:4px 10px;border-radius:20px;font-size:11px}
-#pdfModal,#examModal{position:fixed;inset:0;background:#000e;z-index:99;display:none;flex-direction:column}
-.q-card{background:#0e1938;padding:12px;border-radius:12px;margin:8px 0;border:1px solid #ffffff12}
-/* الخط الذهبي المتدرج */
-.gold-text{
-  background: linear-gradient(90deg, #FFD700, #FFA500, #FFD700);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  font-weight:900;
-  font-size:13px;
-  letter-spacing:0.5px;
-  text-align:center;
-  display:block;
-  margin-top:12px;
-}
+  *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
+  body{background:#0f172a;color:#fff;display:flex;justify-content:center;align-items:center;height:100vh;
+       user-select:none;-webkit-user-select:none;} /* Prevent Text Selection */
+  .login-box{background:#1e293b;padding:40px;border-radius:12px;width:380px;box-shadow:0 0 20px rgba(0,0,0,0.5)}
+  h2{text-align:center;margin-bottom:20px;color:#38bdf8}
+  input{width:100%;padding:12px;margin:10px 0;border-radius:6px;border:none;background:#334155;color:#fff}
+  button{width:100%;padding:12px;background:#0ea5e9;border:none;border-radius:6px;color:#fff;font-weight:bold;cursor:pointer;margin-top:10px}
+  button:hover{background:#0284c7}
+  .footer{text-align:center;margin-top:15px;font-size:12px;color:#94a3b8}
+  /* Watermark */
+  .watermark{position:fixed;pointer-events:none;opacity:0.07;font-size:22px;transform:rotate(-30deg);z-index:9999;white-space:nowrap}
 </style>
 </head>
-  <script>
-if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js')}
-  </script>
-<body>
-<header>
-<div style="font-weight:900">🇸🇸 SSNPS E-LIBRARY V16.1</div>
-<div><button class="btn small ghost" id="langBtn">EN</button> <button class="btn small ghost" id="logoutBtn" style="display:none">Logout</button></div>
-</header>
+<body oncontextmenu="return false;">
 
-<div id="loginBox" class="card">
-<h3>تسجيل دخول</h3>
-<input id="userId" placeholder="Police ID">
-<input id="userPass" type="password" placeholder="Password">
-<button class="btn" id="loginBtn" style="width:100%;margin-top:8px">دخول / LOGIN</button>
-<p id="loginMsg" style="color:#ff6b7a;margin-top:10px;font-size:13px"></p>
-<!-- هنا الخط الذهبي -->
- <span class="gold-text" style="font-size:14px">info@ssnps.gov.ss | 0928812208</span>
+<div class="login-box">
+  <h2>BATCH SECURE LOGIN</h2>
+  <p style="text-align:center;font-size:13px;color:#94a3b8;margin-bottom:15px;">Admin-Only Registration - No Public Sign-up</p>
+  <form action="api/login.php" method="POST" id="loginForm">
+    <input type="text" name="military_id" placeholder="Military ID" required>
+    <input type="password" name="password" placeholder="Password" required>
+    <button type="submit">Secure Login</button>
+  </form>
+  <div class="footer">Protected System - Screenshot & Download Disabled<br>© Police Batch 2026</div>
 </div>
 
-<div id="appBox" class="hidden" style="max-width:980px;margin:auto;padding:12px">
-<div style="display:flex;justify-content:space-between;align-items:center"><h3 id="welcome"></h3><span id="roleBadge" class="badge"></span></div>
-
-<div class="card" style="background:linear-gradient(135deg,#1a2a5a,#2a3a6a);border:1px solid #2d6bff55">
-<h3>📢 الإعلانات</h3>
-<div id="adminAnnounce" style="margin-top:10px"><textarea id="announceText" placeholder="اكتب إعلان جديد..."></textarea><button class="btn small" id="postAnnounceBtn">نشر الإعلان</button></div>
-<div id="announceList" style="margin-top:12px"></div>
-</div>
-
-<div class="card" id="adminCard">
-<h3>👮 إدارة الجنود</h3>
-<div style="display:flex;gap:8px;margin-top:10px"><input id="soldierName" placeholder="الاسم الكامل"><button class="btn" id="addSoldierBtn">إضافة</button></div>
-<div style="display:flex;gap:8px;margin:10px 0"><input id="searchSoldier" placeholder="بحث"><button class="btn small" id="searchSoldierBtn">بحث</button></div>
-<div id="soldiersList"></div>
-</div>
-
-<div class="card">
-<h3>📚 المكتبة + الامتحانات</h3>
-<div id="adminUpload"><input type="file" id="pdfFile" accept="application/pdf"><input id="pdfTitle" placeholder="عنوان الكتاب"><button class="btn danger" id="addBookBtn" style="width:100%">رفع الكتاب</button><p id="uploadStatus" style="font-size:12px"></p></div>
-<div id="booksList" style="margin-top:12px"></div>
-</div>
-<div class="card" style="text-align:center">
-<span class="gold-text" style="font-size:14px">info@ssnps.gov.ss | 0928812208</span>
-<p style="font-size:11px;color:#8aa0d0;margin-top:6px">SSNPS Academy - Juba, South Sudan</p>
-</div>
-</div>
-
-<div id="pdfModal"><div style="display:flex;justify-content:space-between;padding:12px;background:#101a38"><span id="modalTitle"></span><button class="btn small danger" onclick="closeViewer('pdfModal')">✕</button></div><div id="pdfViewer" style="flex:1;background:#000"></div></div>
-<div id="examModal"><div style="display:flex;justify-content:space-between;padding:12px;background:#101a38"><span id="examTitle"></span><button class="btn small danger" onclick="closeViewer('examModal')">✕</button></div><div style="padding:14px;overflow:auto;flex:1"><div id="examContent"></div><div id="examResult"></div></div></div>
-
+<script src="js/secure_viewer.js"></script>
 <script>
-const firebaseConfig={apiKey:"AIzaSyDbPsfTygtodq8THsbSNZ4y2UTO0qHgr_4",authDomain:"ssnps-police-app-7018f.firebaseapp.com",projectId:"ssnps-police-app-7018f",storageBucket:"ssnps-police-app-7018f.firebasestorage.app",messagingSenderId:"705275454318",appId:"1:705275454318:web:a3cb76139563b6c33d977f"};
-firebase.initializeApp(firebaseConfig);
-const db=firebase.firestore();
-let currentUser=null, allSoldiers=[], allBooks=[];
-const esc=s=> (s||'').toString().replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-document.getElementById('langBtn').onclick=()=>{const d=document.documentElement; d.dir=d.dir==='rtl'?'ltr':'rtl';};
-document.getElementById('loginBtn').onclick=async()=>{
- const id=document.getElementById('userId').value.trim(); const pass=document.getElementById('userPass').value.trim(); const msg=document.getElementById('loginMsg');
- if(!id||!pass){msg.textContent='ادخل البيانات';return} msg.textContent='جاري...';
- if((id==='ADMIN' && pass==='Admin@2026') || (id==='SSNPS-5293' && pass==='5293')){currentUser={name:'Admin',id:id,role:'admin'}; showApp(); return;}
- try{
-  let doc=await db.collection('admins').doc(id).get();
-  if(!doc.exists){
-    doc=await db.collection('soldiers').doc(id).get();
+// Web Protection - Block Screenshot Keys
+document.addEventListener('keydown', function(e){
+  if(e.key === 'PrintScreen' || (e.ctrlKey && (e.key==='s' || e.key==='p' || e.key==='c' || e.key==='u'))){
+    e.preventDefault();
+    alert('This action is disabled for security reasons.');
+    return false;
   }
-
-function showApp(){document.getElementById('loginBox').classList.add('hidden'); document.getElementById('appBox').classList.remove('hidden'); document.getElementById('logoutBtn').style.display='inline-block'; document.getElementById('welcome').textContent='مرحب: '+esc(currentUser.name); document.getElementById('roleBadge').textContent=esc(currentUser.role); if(currentUser.role!=='admin'){document.getElementById('adminCard').style.display='none';document.getElementById('adminUpload').style.display='none';document.getElementById('adminAnnounce').style.display='none';} loadSoldiers(); loadBooks(); loadAnnouncements();}
-document.getElementById('logoutBtn').onclick=()=>location.reload();
-document.getElementById('postAnnounceBtn').onclick=async()=>{const txt=document.getElementById('announceText').value.trim(); if(!txt||currentUser.role!=='admin') return; await db.collection('announcements').add({text:txt,created:Date.now(),by:currentUser.name}); document.getElementById('announceText').value=''; loadAnnouncements();};
-async function loadAnnouncements(){const snap=await db.collection('announcements').orderBy('created','desc').limit(20).get(); let h=''; snap.forEach(d=>{const a=d.data(); h+='<div style="background:#0e1938;padding:10px;border-radius:10px;margin:6px 0"><b>'+esc(a.by)+'</b><p>'+esc(a.text)+'</p>'+(currentUser.role==='admin'?'<button class="btn small danger" onclick="delAnn(\''+d.id+'\')">مسح</button>':'')+'</div>';}); document.getElementById('announceList').innerHTML=h||'لا يوجد إعلانات';}
-window.delAnn=async(id)=>{if(confirm('مسح؟')){await db.collection('announcements').doc(id).delete(); loadAnnouncements();}};
-document.getElementById('addSoldierBtn').onclick=async()=>{const name=document.getElementById('soldierName').value.trim(); if(!name) return; const newId='SSNPS-'+Math.floor(1000+Math.random()*9000); const pass=Math.random().toString(36).slice(-8).toUpperCase(); await db.collection('soldiers').doc(newId).set({name,id:newId,pass,created:Date.now(),role:'soldier'}); document.getElementById('soldierName').value=''; loadSoldiers();};
-async function loadSoldiers(){const snap=await db.collection('soldiers').orderBy('created','desc').limit(200).get(); allSoldiers=[]; snap.forEach(d=>allSoldiers.push(d.data())); renderSoldiers(allSoldiers);}
-function renderSoldiers(list){let h='<b>العدد: '+list.length+'</b><br><br>'; list.forEach(x=>{h+='<div class="item"><span>'+esc(x.name)+'</span><span class="badge">'+esc(x.id)+'</span>'+(currentUser.role==='admin'?'<button class="btn small danger" style="margin-inline-start:6px" onclick="deleteSoldier(\''+esc(x.id)+'\')">مسح</button>':'')+'</div>';}); document.getElementById('soldiersList').innerHTML=h;}
-window.deleteSoldier=async(id)=>{if(!confirm('مسح '+id+' ؟')) return; await db.collection('soldiers').doc(id).delete(); loadSoldiers();};
-document.getElementById('searchSoldierBtn').onclick=()=>{const q=document.getElementById('searchSoldier').value.toLowerCase(); renderSoldiers(allSoldiers.filter(s=>s.name.toLowerCase().includes(q)||s.id.toLowerCase().includes(q)));};
-document.getElementById('addBookBtn').onclick=async()=>{const file=document.getElementById('pdfFile').files[0]; const title=document.getElementById('pdfTitle').value.trim(); if(!file||!title) return; const r=new FileReader(); r.onload=async e=>{await db.collection('library').add({title,data:e.target.result,created:Date.now()}); loadBooks();}; r.readAsDataURL(file);};
-async function loadBooks(){const snap=await db.collection('library').orderBy('created','desc').limit(100).get(); allBooks=[]; snap.forEach(d=>allBooks.push({fid:d.id,...d.data()})); renderBooks(allBooks);}
-function renderBooks(list){let h=list.length?'':'لا يوجد كتب'; list.forEach(b=>{h+='<div class="item"><span><b>'+esc(b.title)+'</b></span><span><button class="btn small" onclick="viewOnly(\''+b.fid+'\')">قراءة</button> '+(currentUser.role==='admin'?'<button class="btn small ghost" onclick="createExam(\''+b.fid+'\')">+امتحان</button> <button class="btn small danger" onclick="deleteBook(\''+b.fid+'\')">مسح</button>':'<button class="btn small ghost" onclick="openExam(\''+b.fid+'\')">امتحان</button>')+'</span></div>';}); document.getElementById('booksList').innerHTML=h;}
-window.viewOnly=fid=>{const b=allBooks.find(x=>x.fid===fid); document.getElementById('modalTitle').textContent=b.title; document.getElementById('pdfViewer').innerHTML='<iframe src="'+b.data+'#toolbar=0" style="width:100%;height:90vh;border:none"></iframe>'; document.getElementById('pdfModal').style.display='flex';};
-window.closeViewer=id=>{document.getElementById(id).style.display='none';};
-window.deleteBook=async fid=>{if(confirm('مسح الكتاب؟')){await db.collection('library').doc(fid).delete(); loadBooks();}};
-window.createExam=async fid=>{const b=allBooks.find(x=>x.fid===fid); const q=prompt('سؤال للكتاب: '+b.title); if(!q) return; const a=prompt('إجابة صحيحة:'); const b1=prompt('إجابة خاطئة 1:'); const c1=prompt('إجابة خاطئة 2:'); if(!a||!b1||!c1) return; await db.collection('exams').doc(fid).set({bookId:fid,bookTitle:b.title,questions:[{q:q,options:[a,b1,c1].sort(()=>0.5-Math.random()),correct:a}],created:Date.now()}); alert('تم');};
-window.openExam=async fid=>{const doc=await db.collection('exams').doc(fid).get(); if(!doc.exists){alert('لا يوجد امتحان');return} const ex=doc.data(); document.getElementById('examTitle').textContent=ex.bookTitle; let h=''; ex.questions.forEach((qq,i)=>{h+='<div style="background:#0e1938;padding:10px;margin:8px 0;border-radius:10px"><p><b>'+esc(qq.q)+'</b></p>'; qq.options.forEach(o=>{h+='<label style="display:block;margin:4px 0"><input type="radio" name="q'+i+'" value="'+esc(o)+'"> '+esc(o)+'</label>';}); h+='</div>';}); h+='<button class="btn" onclick="submitExam(\''+fid+'\')">إرسال</button>'; document.getElementById('examContent').innerHTML=h; document.getElementById('examResult').innerHTML=''; document.getElementById('examModal').style.display='flex';};
-window.submitExam=async fid=>{const doc=await db.collection('exams').doc(fid).get(); const ex=doc.data(); let s=0; ex.questions.forEach((qq,i)=>{const sel=document.querySelector('input[name="q'+i+'"]:checked'); if(sel&&sel.value===qq.correct) s++;}); document.getElementById('examResult').innerHTML='<div class="card">نتيجتك: '+s+'/'+ex.questions.length+'</div>';};
+});
+// Blur when user switches tab (anti screen record)
+document.addEventListener('visibilitychange', function(){
+  if(document.hidden){ document.body.style.filter='blur(15px)'; }
+  else{ document.body.style.filter='none'; }
+});
+// Dynamic Watermark if logged in
+const user = localStorage.getItem('officer_name');
+if(user){
+  const wm = document.createElement('div');
+  wm.className='watermark';
+  wm.innerText = user + ' | ' + localStorage.getItem('military_id') + ' | ' + new Date().toLocaleString();
+  wm.style.top='40%'; wm.style.left='10%';
+  document.body.appendChild(wm);
+}
 </script>
 </body>
 </html>
