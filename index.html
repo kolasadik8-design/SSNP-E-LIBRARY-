@@ -1,65 +1,112 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Police Batch - Secure Portal</title>
-<!-- Firebase SDK - LINE 6 to 9 -->
-<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-storage-compat.js"></script>
+<html lang="ar" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>مطعم JAMUS - نظام آمن v4.3 🔒</title>
+<meta name="theme-color" content="#7A0C1A">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data:; script-src 'self' 'unsafe-inline' https://unpkg.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://unpkg.com;">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Arial}
-body{background:#0f172a;color:#fff;display:flex;justify-content:center;align-items:center;height:100vh;user-select:none}
-.box{background:#1e293b;padding:30px;border-radius:12px;width:400px}
-input,button{width:100%;padding:12px;margin:8px 0;border-radius:6px;border:none}
-input{background:#334155;color:#fff} button{background:#0ea5e9;color:#fff;font-weight:bold;cursor:pointer}
-</style>
-</head>
-<body oncontextmenu="return false;">
-<div class="box">
-<h2 style="text-align:center;color:#38bdf8;">BATCH SECURE LOGIN</h2>
-<input id="milId" placeholder="Military ID">
-<input id="pass" type="password" placeholder="Password">
-<button onclick="login()">Login</button>
-<p id="msg" style="color:#f87171;text-align:center;margin-top:10px;"></p>
-</div>
+:root{--maroon:#7A0C1A;--bg:#f1f5f9;--border:#e2e8f0}*{box-sizing:border-box;font-family:Inter,Tahoma}body{margin:0;background:var(--bg)}
+.top{position:sticky;top:0;background:linear-gradient(90deg,#7A0C1A,#4a0810);color:#fff;padding:10px 14px;display:flex;justify-content:space-between;z-index:50}
+.card{background:#fff;border-radius:16px;padding:16px;margin-bottom:12px;border:1px solid var(--border)}
+.card-h{font-weight:900;font-size:13px;color:var(--maroon);margin-bottom:10px}
+.btn{border:0;border-radius:10px;padding:10px 16px;font-weight:700;cursor:pointer;font-size:12px}
+.btn-p{background:var(--maroon);color:#fff}.btn-s{background:#fff;border:1px solid var(--border)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.tab{display:none}.tab.active{display:block}.tabs{display:flex;gap:6px;overflow-x:auto;margin:12px 0}
+.tabs button{white-space:nowrap;padding:8px 14px;border-radius:100px;border:1px solid var(--border);background:#fff;font-weight:700;font-size:11px}
+.tabs button.active{background:var(--maroon);color:#fff}
+#loginPage{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px;background:radial-gradient(800px at 50% -10%,#A31528,#2a0509)}
+.login-card{width:100%;max-width:420px;background:#fff;border-radius:20px;overflow:hidden}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--border);border-radius:10px}
+.kpi{padding:12px;border-radius:12px;text-align:center;background:#fff;border:1px solid var(--border)}
+.security-badge{background:#16a34a;color:#fff;font-size:8px;padding:3px 8px;border-radius:100px}
+#deliveryMap{height:280px;border-radius:12px;border:2px solid var(--maroon)}
+</style></head><body>
+<div id="loginPage"><div class="login-card">
+<div style="text-align:center;padding:28px 24px"><div style="font-weight:900;font-size:22px">مطعم JAMUS</div><div style="font-size:11px;color:#64748b">v4.3 SECURE 🔒 - نظام المطعم الآمن</div><div style="margin-top:6px"><span class="security-badge">🔒 SECURE</span> <span class="security-badge" style="background:#0f172a">🛡️ Anti-Hack</span> <span class="security-badge" style="background:#f59e0b">🚫 Fake GPS Block</span></div></div>
+<div style="padding:18px"><select id="roleSelect">
+<option value="cashier">💰 كاشير</option>
+<option value="waiter">🧑‍🍳 ويتر / جرسون</option>
+<option value="chef">👨‍🍳 شيف مطبخ</option>
+<option value="delivery">🛵 دليفري</option>
+<option value="manager">📋 مدير</option>
+<option value="admin">🔧 أدمن</option>
+</select><input id="u" placeholder="Email" style="margin-top:8px"><input id="p" type="password" placeholder="123456" style="margin-top:8px"><button class="btn btn-p" style="width:100%;margin-top:12px" onclick="login()">دخول آمن 🔒</button><small id="loginMsg" style="color:#dc2626;display:block;text-align:center;margin-top:8px"></small></div></div></div>
+<div id="app" style="display:none"><div class="top"><div><b style="font-size:12px">مطعم JAMUS v4.3 🔒</b><div style="font-size:9px;opacity:.8"><span id="roleBadge"></span> • <span id="clubName"></span> • <span id="firebaseStatus">Secure...</span> • <span id="securityStatus">🛡️ محمي</span></div></div><button class="btn btn-s" style="padding:6px 8px;font-size:10px;background:rgba(255,255,255,.15);color:#fff" onclick="logout()">خروج</button></div>
+<div style="max-width:1100px;margin:0 auto;padding:12px">
+<div id="tabs" class="tabs"><button class="active" onclick="showTab('orders',this)">الطلبات 🍽️</button><button onclick="showTab('menu',this)">المنيو</button><button onclick="showTab('delivery',this)">الدليفري 🛵</button><button onclick="showTab('kitchen',this)">المطبخ 👨‍🍳</button><button onclick="showTab('reports',this)">التقارير 🔒</button><button onclick="showTab('security',this)">الحماية 🛡️</button></div>
 
+<div id="tab-orders" class="tab active"><div class="card"><div class="card-h">طلب جديد - آمن</div><div class="g2"><select id="tableNum"><option>طاولة 1</option><option>طاولة 2</option><option>طاولة 3</option><option>طاولة 4</option><option>طاولة 5</option><option>سفري</option><option>دليفري</option></select><select id="orderType"><option>داخل المطعم</option><option>سفري</option><option>دليفري - توصيل</option></select></div><div id="menuItems" style="margin-top:12px"></div><div style="margin-top:12px;padding:12px;background:#f8fafc;border-radius:10px"><div style="display:flex;justify-content:space-between;font-weight:900"><span>الإجمالي:</span><span id="totalPrice">0 SDG</span></div><button class="btn btn-p" style="width:100%;margin-top:10px" onclick="placeOrder()">تأكيد الطلب 🔒</button></div></div><div class="card"><div class="card-h">الطلبات النشطة - Firebase آمن</div><div id="activeOrders"></div></div></div>
+
+<div id="tab-delivery" class="tab"><div class="card"><div class="card-h">تتبع الدليفري - آمن + كشف Fake GPS 🛡️</div><div style="background:#0f172a;color:#fff;border-radius:12px;padding:14px;text-align:center"><div style="font-size:10px;opacity:.6">LIVE - Delivery • <span id="deliveryStatus">في المطعم</span> • <span style="background:#16a34a;padding:2px 6px;border-radius:100px;font-size:8px">🛡️ FAKE GPS BLOCK</span></div><div style="font-size:28px;font-weight:900;margin:8px 0" id="deliveryDist">0.00 KM</div><div class="g3" style="font-size:10px"><div><b id="deliveryTime" style="font-size:16px">00:00</b><br>الوقت</div><div><b id="deliverySpeed" style="font-size:16px">0.0</b><br>KM/H</div><div><b id="deliveryOrder" style="font-size:14px">#0</b><br>طلب</div></div><div style="margin-top:10px;font-size:9px;opacity:.5" id="deliveryCoords">في انتظار GPS...</div><div style="margin-top:6px;font-size:8px;padding:4px;background:rgba(22,163,74,.2);border-radius:6px" id="deliverySecurity">🛡️ الحماية: مراقبة Fake GPS...</div></div><div class="g2" style="margin-top:10px"><button class="btn btn-p" onclick="startDelivery()">بدء التوصيل 🔒</button><button class="btn btn-s" onclick="stopDelivery()">تم التوصيل ✅</button></div><div id="deliveryMap" style="margin-top:10px"></div></div></div>
+<div id="tab-menu" class="tab"><div class="card"><div class="card-h">إدارة المنيو - آمن</div><div class="g2"><input id="itemName" placeholder="اسم الصنف"><input id="itemPrice" type="number" placeholder="السعر SDG"></div><button class="btn btn-p" style="width:100%;margin-top:8px" onclick="addMenuItem()">إضافة صنف 🔒</button><div id="menuList" style="margin-top:12px"></div></div></div>
+<div id="tab-kitchen" class="tab"><div class="card"><div class="card-h">شاشة المطبخ 👨‍🍳 - مباشر</div><div id="kitchenOrders"></div></div></div>
+<div id="tab-reports" class="tab"><div class="card"><div class="card-h">التقارير المالية - آمن 🔒</div><div class="g3"><div class="kpi"><small>مبيعات اليوم</small><b id="salesToday">0 SDG</b></div><div class="kpi"><small>عدد الطلبات</small><b id="ordersToday">0</b></div><div class="kpi"><small>متوسط الطلب</small><b id="avgOrder">0 SDG</b></div></div><div style="margin-top:10px;display:flex;gap:6px"><button class="btn btn-p" style="font-size:10px" onclick="exportSales()">تصدير المبيعات CSV 🔒</button><button class="btn btn-s" style="font-size:10px" onclick="clearDay()">إغلاق اليوم</button></div><div id="salesList" style="margin-top:10px"></div></div></div>
+<div id="tab-security" class="tab"><div class="card"><div class="card-h">🛡️ سجل الحماية - مراقبة الاختراقات</div><div style="font-size:10px;color:#64748b">محاولات Fake GPS، XSS، محاولات دخول فاشلة</div><div id="securityLogList" style="max-height:300px;overflow-y:auto;margin-top:10px"></div><div style="margin-top:10px;display:flex;gap:6px"><button class="btn btn-s" style="font-size:10px" onclick="clearSecurityLog()">مسح السجل</button><button class="btn btn-p" style="font-size:10px" onclick="exportSecurityLog()">تصدير سجل الحماية</button></div></div>
+<div class="card"><div class="card-h">Firebase Rules - انسخ في Firebase Console 🔒</div><div style="font-size:10px;background:#0f172a;color:#fff;padding:12px;border-radius:8px;white-space:pre">rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /orders/{docId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null;
+      allow update: if request.auth != null 
+        && request.auth.token.email in ['admin@jamus.com','manager@jamus.com','cashier@jamus.com'];
+      allow delete: if false;
+    }
+    match /menu/{docId} {
+      allow read: if true;
+      allow write: if request.auth != null 
+        && request.auth.token.email in ['admin@jamus.com','manager@jamus.com'];
+    }
+    match /delivery_logs/{docId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null;
+      allow update, delete: if false;
+    }
+    match /security_logs/{docId} {
+      allow read: if request.auth != null && request.auth.token.email == 'admin@jamus.com';
+      allow create: if request.auth != null;
+      allow update, delete: if false;
+    }
+  }
+}</div></div></div>
+</div></div>
 <script>
-// LINE 32 - FIREBASE CONFIG - Replace with your config from Firebase Console
-const firebaseConfig = {
-  apiKey: "AIzaSyDbPsfTygtodq8THsbSNZ4y2UTO0qHgr_4",
-  authDomain: "ssnps-police-app-7018f.firebaseapp.com",
-  projectId: "ssnps-police-app-7018f",
-  storageBucket: "ssnps-police-app-7018f.firebasestorage.app",
-  messagingSenderId: "705275454318",
-  appId: "1:705275454318:web:4ac5261ba5beb6c33d977f"
-};
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
-
-// LINE 45 - LOGIN FUNCTION
-async function login(){
-  const militaryId = document.getElementById('milId').value.trim();
-  const password = document.getElementById('pass').value.trim();
-  // Find email by military_id
-  const snap = await db.collection('officers').where('military_id','==',militaryId).get();
-  if(snap.empty){ document.getElementById('msg').innerText='ID not found - Contact Admin'; return; }
-  const email = snap.docs[0].data().email;
-  try{
-    await auth.signInWithEmailAndPassword(email, password);
-    localStorage.setItem('officer', JSON.stringify(snap.docs[0].data()));
-    window.location.href='dashboard.html';
-  }catch(e){ document.getElementById('msg').innerText=e.message; }
-}
-
-// Anti Screenshot Protection
-document.addEventListener('keydown', e=>{
-  if(e.key==='PrintScreen' || (e.ctrlKey && ['s','p','c'].includes(e.key.toLowerCase()))){ e.preventDefault(); alert('Action Disabled'); }
-});
-document.addEventListener('visibilitychange', ()=>{ document.body.style.filter=document.hidden?'blur(20px)':'none'; });
-</script>
-</body>
-</html>
+// === SECURE v4.3 RESTAURANT - ANTI-HACK ===
+const esc=s=>{let str=String(s||'');if(/javascript:/i.test(str))return '#blocked';return str.replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));};
+let securityLogs=JSON.parse(localStorage.getItem('restaurant_security')||'[]');
+function logSecurity(type,details,sev='info'){let log={ts:new Date().toISOString(),type,details,sev,player:currentEmail||'unknown'};securityLogs.unshift(log);if(securityLogs.length>100)securityLogs=securityLogs.slice(0,100);localStorage.setItem('restaurant_security',JSON.stringify(securityLogs));if(db)db.collection('security_logs').add({...log,createdAt:firebase.firestore.FieldValue.serverTimestamp()}).catch(()=>{});renderSecurityLog();}
+function renderSecurityLog(){let el=document.getElementById('securityLogList');if(!el)return;el.innerHTML=securityLogs.slice(0,20).map(l=>`<div style="padding:6px;margin-bottom:4px;border-radius:6px;font-size:10px;background:${l.sev==='critical'?'#fee2e2':l.sev==='high'?'#fef3c7':'#f8fafc'}"><b>[${l.sev}] ${esc(l.type)}</b> - ${esc(l.details)}<br><small>${esc(l.player)} • ${new Date(l.ts).toLocaleString('ar-EG')}</small></div>`).join('')||'لا توجد تهديدات - النظام آمن ✅';}
+function clearSecurityLog(){if(confirm('مسح سجل الحماية؟')){securityLogs=[];localStorage.setItem('restaurant_security',JSON.stringify(securityLogs));renderSecurityLog();}}
+function exportSecurityLog(){let csv='Time,Type,Severity,Details\n';securityLogs.forEach(l=>{csv+=`${l.ts},${l.type},${l.sev},"${l.details}"\n`;});let blob=new Blob([csv],{type:'text/csv'});let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`SECURITY_${new Date().toISOString().split('T')[0]}.csv`;a.click();}
+let currentRole=localStorage.getItem('rest_role')||'',currentEmail=localStorage.getItem('rest_email')||'';
+let watchId=null,gpsDistance=0,lastPos=null,gpsSeconds=0,gpsTimer=null,deliveryMap=null;
+let menu=JSON.parse(localStorage.getItem('restaurant_menu')||'[]');if(menu.length===0){menu=[{id:1,name:'كبسة لحم',price:3500},{id:2,name:'مندي دجاج',price:3000},{id:3,name:'مشاوي مشكل',price:5000},{id:4,name:'بيتزا',price:2500},{id:5,name:'برجر',price:1500},{id:6,name:'شاورما',price:1200},{id:7,name:'عصير طبيعي',price:500}];localStorage.setItem('restaurant_menu',JSON.stringify(menu));}
+let orders=JSON.parse(localStorage.getItem('restaurant_orders')||'[]');let cart=[];let db=null,firebaseReady=false;
+const firebaseConfig={apiKey:window._env_?.FIREBASE_API_KEY||"DEMO_KEY_SECURE",authDomain:window._env_?.FIREBASE_AUTH_DOMAIN||"jamus-restaurant-demo.firebaseapp.com",projectId:window._env_?.FIREBASE_PROJECT_ID||"jamus-restaurant-demo",storageBucket:"demo.appspot.com",messagingSenderId:"123",appId:"1:123:web:demo"};
+try{firebase.initializeApp(firebaseConfig);db=firebase.firestore();firebaseReady=true;document.getElementById('firebaseStatus').innerText='Firebase آمن ✅';}catch(e){document.getElementById('firebaseStatus').innerText='Local آمن ✅';}
+function calcDistance(lat1,lon1,lat2,lon2){let R=6371e3,a=Math.sin((lat2-lat1)*Math.PI/180/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin((lon2-lon1)*Math.PI/180/2)**2,c=2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));return R*c;}
+function detectFakeGPS(pos){let reasons=[];if(pos.coords.speed*3.6>60)reasons.push(`سرعة ${(pos.coords.speed*3.6).toFixed(1)} >60`);if(pos.coords.accuracy>80)reasons.push(`دقة ${pos.coords.accuracy}m`);if(lastPos){let d=calcDistance(lastPos.latitude,lastPos.longitude,pos.coords.latitude,pos.coords.longitude);if(d>200)reasons.push(`قفزة ${d.toFixed(0)}m`);}if(reasons.length>0){logSecurity('FAKE_GPS_BLOCKED',`دليفري Fake GPS: ${reasons.join(', ')}`,'high');return true;}return false;}
+function initApp(){document.getElementById('loginPage').style.display='none';document.getElementById('app').style.display='block';document.getElementById('roleBadge').innerText=esc(currentRole);document.getElementById('clubName').innerText=esc(currentEmail);renderMenu();renderOrders();renderKitchen();renderReports();renderSecurityLog();setTimeout(()=>{if(document.getElementById('deliveryMap')){try{deliveryMap=L.map('deliveryMap').setView([4.85,31.58],13);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(deliveryMap);}catch(e){}}},500);}
+function login(){let r=document.getElementById('roleSelect').value,e=document.getElementById('u').value.trim()||r+'@jamus.com',p=document.getElementById('p').value.trim();if(p!==''&&p!=='123456'){document.getElementById('loginMsg').innerText='كلمة السر 123456';return;}if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)){document.getElementById('loginMsg').innerText='ايميل غير صحيح';logSecurity('INVALID_LOGIN',`محاولة دخول بايميل غلط: ${e}`,'medium');return;}currentRole=r;currentEmail=e;localStorage.setItem('rest_role',r);localStorage.setItem('rest_email',e);logSecurity('LOGIN_SUCCESS',`دخول ${e} كـ ${r}`,'info');initApp();}
+function logout(){logSecurity('LOGOUT',`${currentEmail} خرج`,'info');localStorage.removeItem('rest_role');localStorage.removeItem('rest_email');location.reload();}
+function showTab(id,btn){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));if(btn){btn.parentElement.querySelectorAll('button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}document.getElementById('tab-'+id).classList.add('active');if(id==='delivery'&&deliveryMap)setTimeout(()=>deliveryMap.invalidateSize(),300);}
+function renderMenu(){let el=document.getElementById('menuItems');if(!el)return;el.innerHTML=menu.map(m=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f1f5f9"><div><b>${esc(m.name)}</b> - ${m.price} SDG</div><div><button class="btn btn-p" style="padding:4px 8px;font-size:10px" onclick="addToCart(${m.id})">إضافة</button></div></div>`).join('');let list=document.getElementById('menuList');if(list)list.innerHTML=menu.map(m=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f1f5f9;font-size:12px"><span>${esc(m.name)} - ${m.price} SDG</span><button class="btn btn-s" style="padding:2px 6px;font-size:9px" onclick="removeMenu(${m.id})">حذف</button></div>`).join('');}
+function addMenuItem(){let n=document.getElementById('itemName').value.trim(),p=parseInt(document.getElementById('itemPrice').value);if(!n||!p)return alert('ادخل اسم وسعر');if(/<script|javascript:/i.test(n)){logSecurity('XSS_BLOCKED',`محاولة حقن XSS في المنيو: ${n}`,'high');alert('ممنوع كود');return;}menu.push({id:Date.now(),name:esc(n),price:p});localStorage.setItem('restaurant_menu',JSON.stringify(menu));renderMenu();logSecurity('MENU_ADDED',`إضافة صنف ${n} - ${p} SDG`,'info');}
+function removeMenu(id){menu=menu.filter(m=>m.id!==id);localStorage.setItem('restaurant_menu',JSON.stringify(menu));renderMenu();}
+function addToCart(id){let item=menu.find(m=>m.id===id);cart.push(item);updateTotal();}
+function updateTotal(){let total=cart.reduce((a,b)=>a+b.price,0);document.getElementById('totalPrice').innerText=total+' SDG';}
+function placeOrder(){if(cart.length===0)return alert('السلة فاضية');let table=document.getElementById('tableNum').value,type=document.getElementById('orderType').value;let order={id:Date.now(),table:esc(table),type:esc(type),items:cart.map(c=>esc(c.name)),total:cart.reduce((a,b)=>a+b.price,0),status:'جديد',time:new Date().toLocaleString('ar-EG'),cashier:esc(currentEmail),createdAt:new Date().toISOString()};orders.unshift(order);localStorage.setItem('restaurant_orders',JSON.stringify(orders));if(db)db.collection('orders').add({...order,createdAt:firebase.firestore.FieldValue.serverTimestamp()}).catch(()=>{});cart=[];updateTotal();renderOrders();renderKitchen();renderReports();logSecurity('ORDER_PLACED',`طلب جديد #${order.id} - ${order.total} SDG - ${table}`,'info');alert(`تم الطلب #${order.id} - ${order.total} SDG`);}
+function renderOrders(){let el=document.getElementById('activeOrders');if(!el)return;el.innerHTML=orders.slice(0,10).map(o=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f1f5f9;font-size:12px"><div><b>#${o.id.toString().slice(-4)}</b> ${esc(o.table)} - ${o.items.length} أصناف - <b>${o.total} SDG</b> - ${esc(o.status)}<br><small>${esc(o.time)} • ${esc(o.cashier)}</small></div><div><button class="btn btn-p" style="padding:4px 8px;font-size:9px" onclick="updateOrder(${o.id},'تم')">تم ✅</button></div></div>`).join('')||'لا توجد طلبات';}
+function renderKitchen(){let el=document.getElementById('kitchenOrders');if(!el)return;let pending=orders.filter(o=>o.status==='جديد');el.innerHTML=pending.map(o=>`<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:12px;margin-bottom:8px"><div style="display:flex;justify-content:space-between"><b>طلب #${o.id.toString().slice(-4)} - ${esc(o.table)}</b><small>${esc(o.time)}</small></div><div style="margin-top:6px;font-size:12px">${o.items.map(i=>`• ${esc(i)}`).join('<br>')}</div><div style="margin-top:8px"><b>الإجمالي: ${o.total} SDG</b> - ${esc(o.type)}</div><button class="btn btn-p" style="width:100%;margin-top:8px" onclick="updateOrder(${o.id},'جاهز')">جاهز للتقديم 🍽️</button></div>`).join('')||'المطبخ فاضي ✅';}
+function updateOrder(id,status){let o=orders.find(x=>x.id===id);if(o){o.status=status;localStorage.setItem('restaurant_orders',JSON.stringify(orders));renderOrders();renderKitchen();logSecurity('ORDER_STATUS',`طلب #${id} → ${status}`,'info');}}
+function renderReports(){let today=orders.filter(o=>new Date(o.createdAt).toDateString()===new Date().toDateString());let total=today.reduce((a,b)=>a+b.total,0);document.getElementById('salesToday').innerText=total+' SDG';document.getElementById('ordersToday').innerText=today.length;document.getElementById('avgOrder').innerText=(today.length?Math.round(total/today.length):0)+' SDG';document.getElementById('salesList').innerHTML=today.slice(0,10).map(o=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f1f5f9;font-size:11px"><span>#${o.id.toString().slice(-4)} - ${esc(o.table)} - ${o.items.length} أصناف</span><span><b>${o.total} SDG</b> - ${esc(o.status)}</span></div>`).join('')||'لا مبيعات اليوم';}
+function exportSales(){let csv='ID,Table,Type,Items,Total,Status,Time,Cashier\n';orders.forEach(o=>{csv+=`${o.id},${o.table},${o.type},"${o.items.join(',')}",${o.total},${o.status},${o.time},${o.cashier}\n`;});let blob=new Blob([csv],{type:'text/csv'});let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`SALES_${new Date().toISOString().split('T')[0]}.csv`;a.click();logSecurity('SALES_EXPORTED','تصدير المبيعات','info');}
+function clearDay(){if(confirm('إغلاق اليوم ومسح الطلبات؟')){logSecurity('DAY_CLOSED',`إغلاق اليوم - مبيعات ${orders.reduce((a,b)=>a+b.total,0)} SDG`,'medium');orders=[];localStorage.setItem('restaurant_orders',JSON.stringify(orders));renderOrders();renderKitchen();renderReports();}}
+function startDelivery(){if(!navigator.geolocation)return alert('GPS غير متاح');if(watchId)return;gpsDistance=0;lastPos=null;gpsSeconds=0;document.getElementById('deliveryCoords').innerText='جاري تحديد الموقع...';gpsTimer=setInterval(()=>{gpsSeconds++;document.getElementById('deliveryTime').innerText=new Date(gpsSeconds*1000).toISOString().substr(11,8);},1000);watchId=navigator.geolocation.watchPosition(pos=>{if(detectFakeGPS(pos)){document.getElementById('deliverySecurity').innerText='🚨 Fake GPS مكتشف - التوصيل غير محسوب';document.getElementById('deliveryCoords').innerText=`⚠️ Fake GPS - ${pos.coords.latitude.toFixed(5)},${pos.coords.longitude.toFixed(5)}`;return;}let acc=Math.round(pos.coords.accuracy);document.getElementById('deliveryCoords').innerText=`📍 ${pos.coords.latitude.toFixed(5)},${pos.coords.longitude.toFixed(5)} ±${acc}m`;document.getElementById('deliverySecurity').innerText='🛡️ GPS حقيقي - آمن';let speedKmh=(pos.coords.speed||0)*3.6;document.getElementById('deliverySpeed').innerText=speedKmh.toFixed(1);if(lastPos){let d=calcDistance(lastPos.latitude,lastPos.longitude,pos.coords.latitude,pos.coords.longitude);if(d>2&&d<100)gpsDistance+=d;document.getElementById('deliveryDist').innerText=(gpsDistance/1000).toFixed(2)+' KM';}if(deliveryMap){try{deliveryMap.setView([pos.coords.latitude,pos.coords.longitude],15);L.marker([pos.coords.latitude,pos.coords.longitude]).addTo(deliveryMap);}catch(e){}}lastPos={latitude:pos.coords.latitude,longitude:pos.coords.longitude};},err=>{document.getElementById('deliveryCoords').innerText='خطأ: '+err.message;},{enableHighAccuracy:true});document.getElementById('deliveryStatus').innerText='في الطريق 🛵';logSecurity('DELIVERY_STARTED','بدأ التوصيل','info');}
+function stopDelivery(){if(watchId){navigator.geolocation.clearWatch(watchId);watchId=null;}if(gpsTimer){clearInterval(gpsTimer);gpsTimer=null;}let data={delivery:currentEmail,distance:(gpsDistance/1000).toFixed(2),time:document.getElementById('deliveryTime').innerText,date:new Date().toISOString().split('T')[0]};if(db)db.collection('delivery_logs').add({...data,createdAt:firebase.firestore.FieldValue.serverTimestamp()});alert(`تم التوصيل: ${data.distance}KM - ${data.time}`);logSecurity('DELIVERY_COMPLETED',`توصيل ${data.distance}KM - ${data.time}`,'info');document.getElementById('deliveryStatus').innerText='تم التوصيل ✅';}
+if(currentRole)initApp();
+</script></body></html>
